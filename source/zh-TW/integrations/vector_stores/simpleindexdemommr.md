@@ -1,0 +1,306 @@
+---
+title: "簡單的向量儲存 - 最大邊際相關性檢索"
+---
+
+此筆筆記探討了 MMR retrieval \[[1](https://www.cs.cmu.edu/~jgc/publication/The_Use_MMR_Diversity_Based_LTMIR_1998.pdf)] 的使用。透過最大邊際相關性 (maximum marginal relevance)，可以迭代地找到與先前結果不相似的 documents。研究顯示這能提升 LLM 的 retrieval 性能 \[[2](https://arxiv.org/pdf/2211.13892.pdf)]。
+
+最大邊際相關性演算法如下：
+$$ \text{{MMR}} = \arg\max\_{d\_i \in D \setminus R} \[ \lambda \cdot Sim\_1(d\_i, q) - (1 - \lambda) \cdot \max\_{d\_j \in R} Sim\_2(d\_i, d\_j) ] $$
+
+其中，$D$ 是所有候選的 documents 集合，$R$ 是已選定的 documents 集合，$q$ 是查詢，$Sim\_1$ 是 document 與查詢之間的相似度函數，$Sim\_2$ 是兩個 documents 之間的相似度函數。$d\_i$ 和 $d\_j$ 分別是 $D$ 和 $R$ 中的 documents。
+
+參數 $\lambda$ (mmr\_threshold) 控制著相關性（第一項）與多樣性（第二項）之間的權衡。如果 mmr\_threshold 接近 1，則更側重於相關性；而 mmr\_threshold 接近 0，則更側重於多樣性。
+
+下載資料
+
+```
+%pip install llama-index-embeddings-openai
+%pip install llama-index-llms-openai
+```
+
+```
+!mkdir -p 'data/paul_graham/'
+!wget 'https://raw.githubusercontent.com/run-llama/llama_index/main/docs/examples/data/paul_graham/paul_graham_essay.txt' -O 'data/paul_graham/paul_graham_essay.txt'
+```
+
+```
+import os
+
+
+os.environ["OPENAI_API_KEY"] = "sk-..."
+```
+
+```
+from llama_index.embeddings.openai import OpenAIEmbedding
+from llama_index.llms.openai import OpenAI
+from llama_index.core import Settings
+
+
+Settings.llm = OpenAI(model="gpt-3.5-turbo", temperature=0.2)
+Settings.embed_model = OpenAIEmbedding(model="text-embedding-3-small")
+```
+
+llama\_index/docs/examples/data/paul\_graham
+
+```
+from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
+
+
+documents = SimpleDirectoryReader("./data/paul_graham/").load_data()
+index = VectorStoreIndex.from_documents(documents)
+
+
+# To use mmr, set it as a vector_store_query_mode
+query_engine = index.as_query_engine(vector_store_query_mode="mmr")
+response = query_engine.query("What did the author do growing up?")
+print(response)
+```
+
+```
+The author wrote short stories and also worked on programming, specifically on an IBM 1401 computer in 9th grade.
+```
+
+```
+from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
+
+
+documents = SimpleDirectoryReader("./data/paul_graham/").load_data()
+index = VectorStoreIndex.from_documents(documents)
+
+
+# To set the threshold, set it in vector_store_kwargs
+query_engine_with_threshold = index.as_query_engine(
+    vector_store_query_mode="mmr", vector_store_kwargs={"mmr_threshold": 0.2}
+)
+
+
+response = query_engine_with_threshold.query(
+    "What did the author do growing up?"
+)
+print(response)
+```
+
+```
+The author wrote short stories and also worked on programming, specifically on an IBM 1401 computer in 9th grade. They later got a microcomputer, a TRS-80, and started programming more extensively, including writing simple games and a word processor.
+```
+
+請注意，node 的分數會根據 threshold 進行縮放，並會因與先前 nodes 的相似度而受到額外懲罰。當 threshold 增加到 1 時，分數會相等，與先前 nodes 的相似度將被忽略，從而關閉 MMR 的影響。降低 threshold 會讓演算法更傾向於更具多樣性的 documents。
+
+```
+index1 = VectorStoreIndex.from_documents(documents)
+query_engine_no_mrr = index1.as_query_engine()
+response_no_mmr = query_engine_no_mrr.query(
+    "What did the author do growing up?"
+)
+
+
+index2 = VectorStoreIndex.from_documents(documents)
+query_engine_with_high_threshold = index2.as_query_engine(
+    vector_store_query_mode="mmr", vector_store_kwargs={"mmr_threshold": 0.8}
+)
+response_low_threshold = query_engine_with_high_threshold.query(
+    "What did the author do growing up?"
+)
+
+
+index3 = VectorStoreIndex.from_documents(documents)
+query_engine_with_low_threshold = index3.as_query_engine(
+    vector_store_query_mode="mmr", vector_store_kwargs={"mmr_threshold": 0.2}
+)
+response_high_threshold = query_engine_with_low_threshold.query(
+    "What did the author do growing up?"
+)
+
+
+print(
+    "Scores without MMR ",
+    [node.score for node in response_no_mmr.source_nodes],
+)
+print(
+    "Scores with MMR and a threshold of 0.8 ",
+    [node.score for node in response_high_threshold.source_nodes],
+)
+print(
+    "Scores with MMR and a threshold of 0.2 ",
+    [node.score for node in response_low_threshold.source_nodes],
+)
+```
+
+```
+Scores without MMR  [0.38770109812709, 0.38159007522004046]
+Scores with MMR and a threshold of 0.8  [0.07754021962541802, -0.31606868760500917]
+Scores with MMR and a threshold of 0.2  [0.31016236260600616, 0.1845257045929435]
+```
+
+## 僅檢索演示 (Retrieval-Only Demonstration)
+
+透過設定較小的 chunk size 並調整 “mmr\_threshold” 參數，我們可以觀察到檢索結果如何從非常多樣化（且不相關）轉變為較不多樣化（且更相關/重複）。
+
+我們嘗試以下數值：0.1, 0.5, 0.8, 1.0
+
+llama\_index/docs/examples/data/paul\_graham
+
+```
+documents = SimpleDirectoryReader("../data/paul_graham/").load_data()
+index = VectorStoreIndex.from_documents(
+    documents,
+)
+```
+
+```
+retriever = index.as_retriever(
+    vector_store_query_mode="mmr",
+    similarity_top_k=3,
+    vector_store_kwargs={"mmr_threshold": 0.1},
+)
+nodes = retriever.retrieve(
+    "What did the author do during his time in Y Combinator?"
+)
+```
+
+```
+from llama_index.core.response.notebook_utils import display_source_node
+
+
+for n in nodes:
+    display_source_node(n, source_length=1000)
+```
+
+**Node ID:** 72313b35-f0dc-4abb-919c-a440aebf0398\
+**Similarity:** 0.05985031885642464\
+**Text:** 當傑西卡和我從三月十一日晚餐後走回家時，在 Garden 和 Walker 街的角落，這三條線索匯合了。管那些花費這麼長時間決定的風險投資人去吧。我們自己創立一家投資公司，並真正實施我們一直在討論的想法。我會提供資金，傑西卡可以辭掉工作從事這件事，我們也會得到 Robert 和 Trevor 作為合夥人。\[13]
+
+再次，無知對我們有利。我們不知道如何成為天使投資人，在 2005 年的波士頓沒有 Ron Conway 可以向我們學習。所以我們只是做了看似明顯的選擇，而我們做的一些事情卻是新穎的。
+
+Y Combinator 有多個組成部分，我們沒有一次都弄清楚它們。我們首先弄清楚的部分是成為一家天使公司。在那個年代，這兩個詞並不常一起出現。有 VC 公司，它們是組織好的公司，有專門負責投資的人，但它們只做大額、數百萬美元的投資……
+
+**Node ID:** d18deb5b-7d2a-4d3d-a30f-a180a1cb7015\
+**Similarity:** -0.38235343418846846\
+**Text:** 我不想退學，但要如何才能離開呢？我記得我的朋友 Robert Morris 因為在 1988 年寫下網際網路蠕蟲而被康乃爾大學開除，我羨慕他找到了這樣一種非常了不起的脫離大學的方式。
+
+然後在 1990 年 4 月有一天，牆上出現了一道裂縫。我遇到了 Cheatham 教授，他問我是否已經進步到可以於六月畢業的程度。我沒有寫下我的論文任何內容，但在我一生中最快的一段思考中，我決定在截止日期前剩餘的五週左右內，重用 On Lisp 的部分內容，嘗試寫一篇，我能夠回應：「是的，我想可以。我幾天後會給你一些可以閱讀的東西。」我選擇了連續體的應用作為主題。回顧起來，我本來應該寫關於宏和嵌入式語言。那裡還有一個幾乎未被探索的整個世界。但我只是想得到……
+
+**Node ID:** 13c6f611-ac9f-47af-b76d-7e40ea16f7ed\
+**Similarity:** -0.3384054315291212\
+**Text:** \[18] 離開 YC 最糟糕的是再也不和 Jessica 合作了。我們認識的幾乎整個時間都在做 YC，我們既沒有試圖也不想將它與我們的個人生活分開，所以離開就像拔掉一棵深深紮根的樹。
+
+\[19] 一種更精確了解「發明」（invented）與「發現」（discovered）概念的方法是談論外星人。任何足夠先進的外星文明肯定都知道畢氏定理（Pythagorean theorem）等。我認為，雖然把握不夠確定，但他們也應該知道 McCarthy 1960 年論文中的 Lisp。
+
+但如果是這樣，就不會有理由假設這是他們可能知道的語言的極限。假設外星人也需要數字、錯誤和 I/O。所以似乎很可能存在至少一條出於 McCarthy Lisp 的路徑，其中「發現性」（discoveredness）得以保留。
+
+感謝 Trevor Blackwell, John Collison, Patrick Collison, Daniel Gackle, Ralph Hazell, Jessica Livingston, Robert Mor…
+
+```
+retriever = index.as_retriever(
+    vector_store_query_mode="mmr",
+    similarity_top_k=3,
+    vector_store_kwargs={"mmr_threshold": 0.5},
+)
+nodes = retriever.retrieve(
+    "What did the author do during his time in Y Combinator?"
+)
+```
+
+```
+for n in nodes:
+    display_source_node(n, source_length=1000)
+```
+
+**Node ID:** 72313b35-f0dc-4abb-919c-a440aebf0398\
+**Similarity:** 0.29925159428212317\
+**Text:** 在三月 11 日，我和 Jessica 在 Garden 和 Walker 街的拐角回家時，這三條線索匯合了。管那些花費時間決定的 VC 們去吧。我們自己創立一家投資公司，並真正實施我們一直在談論的想法。我會提供資金，Jessica 可以辭掉工作從事這件事，我們也會讓 Robert 和 Trevor 成為合夥人。\[13]
+
+再次，無知對我們有利。我們不知道如何成為天使投資人，在 2005 年的波士頓沒有 Ron Conways 可以向我們學習。所以我們只是做了看似明顯的選擇，而我們做的一些事情後來被證明是新穎的。
+
+Y Combinator 有多個組成部分，我們沒有一次都弄清楚它們。我們首先弄清楚的部分是成為一家天使公司。在那個年代，這兩個詞並不常一起出現。有 VC 公司，它們是組織好的公司，有人的工作是進行投資，但它們只做大額、數百萬美元的投資……
+
+**Node ID:** 13c6f611-ac9f-47af-b76d-7e40ea16f7ed\
+**Similarity:** -0.06720844682537574\
+**Text:** \[18] 離開 YC 最糟糕的是再也不和 Jessica 合作了。我們認識的幾乎整個時間都在做 YC，我們既沒有試圖也不想將它與我們的個人生活分開，所以離開就像拔掉一棵深深紮根的樹。
+
+\[19] 一種更精確了解「發明」（invented）與「發現」（discovered）概念的方法是談論外星人。任何足夠先進的外星文明肯定都知道畢氏定理（Pythagorean theorem）等。我認為，雖然把握不夠確定，但他們也應該知道 McCarthy 1960 年論文中的 Lisp。
+
+但如果是這樣，就不會有理由假設這是他們可能知道的語言的極限。假設外星人也需要數字、錯誤和 I/O。所以似乎很可能存在至少一條出於 McCarthy Lisp 的路徑，其中「發現性」（discoveredness）得以保留。
+
+感謝 Trevor Blackwell, John Collison, Patrick Collison, Daniel Gackle, Ralph Hazell, Jessica Livingston, Robert Mor…
+
+**Node ID:** 6a638da9-f42f-4be6-a415-9698fd9636f9\
+**Similarity:** 0.036928354116716855\
+**Text:** 同時，我越來越多地聽說這個叫做 World Wide Web 的新東西。當我訪問在哈佛攻讀學位的劍橋時，Robert Morris 向我展示了它。在我看來，網際網路將會是件大事。我已經看到了圖形使用者介面（graphical user interfaces）對微型電腦（microcomputers）普及所做的事情。這似乎會對網際網路做同樣的事情。如果我想致富，這就是下一班離開車站的火車。我對這部分是沒錯的。我錯的是想法。我決定我們應該創立一家公司來將藝術畫廊搬到網路上。我不能誠實地說，在閱讀了這麼多 Y Combinator 的申請後，這不是史上最糟糕的創業點子，但它確實是其中之一。藝術畫廊不希望在網路上，而且那些高級的畫廊也不希望。那不是他們的銷售方式。我寫了一些軟體來為畫廊生成網站，Robert 寫了一些來調整圖片大小，並設定一個 http server 來提供頁面。然後我們試著註冊 ga…
+
+```
+retriever = index.as_retriever(
+    vector_store_query_mode="mmr",
+    similarity_top_k=3,
+    vector_store_kwargs={"mmr_threshold": 0.8},
+)
+nodes = retriever.retrieve(
+    "What did the author do during his time in Y Combinator?"
+)
+```
+
+```
+for n in nodes:
+    display_source_node(n, source_length=1000)
+```
+
+**Node ID:** 72313b35-f0dc-4abb-919c-a440aebf0398\
+**Similarity:** 0.4788025508513971\
+**Text:** 像 Jessica 和我從三月十一日晚餐後走回家時，在 Garden 和 Walker 街的拐角，這三條線匯合了。管那些花費時間決定的 VC 們去吧。我們自己創立一家投資公司，並真正實施我們一直在談論的想法。我來資助，Jessica 可以辭掉工作從事這件事，我們也會把 Robert 和 Trevor 當成合夥人。\[13]
+
+再次，無知對我們有利。我們不知道如何成為天使投資人，在 2005 年的波士頓沒有 Ron Conway 可以向我們學習。所以我們只是做了看似明顯的選擇，而我們做的一些事情後來被證明是新穎的。
+
+Y Combinator 有多個組成部分，我們沒有一次都弄清楚。我們首先弄清楚的部分是成為一家天使公司。在那個年代，這兩個詞並不常一起出現。有 VC 公司，它們是組織過的公司，裡面的工作是進行投資，但它們只做大額、數百萬美元的投資…
+
+**Node ID:** 555f8603-79f5-424c-bfef-b7a8d9523d4c\
+**Similarity:** 0.30086405397508975\
+**Text:** \[15] 我們收到了 225 份夏季創始人計畫的申請，我們很驚訝地發現其中很多來自已經畢業或即將畢業的人。這個 SFP 項目開始感覺比我們預期的要嚴肅。
+
+我們邀請了 225 個群組中的約 20 個進行面談，從中選出了 8 個來資助。他們是一個令人印象深刻的團隊。第一批包括 reddit、Justin Kan 和 Emmett Shear，他們後來創立了 Twitch；Aaron Swartz，他已經幫助撰寫了 RSS 規範，幾年後成為了開放獲取（open access）的殉道者；以及 Sam Altman，他後來成為 YC 的第二任總裁。我不認為第一批這麼好的結果完全是運氣。你必須非常大膽地申請像夏季創始人計畫這樣奇怪的東西，而不是去微軟或高盛這樣正經的地方找暑期工作。
+
+對於新創公司的交易是基於我們與 Julian 進行的交易（10% 的 10,000 美元）以及…
+
+**Node ID:** d1a19a77-93e2-4f5b-8eb2-b7f265f15ec2\
+**Similarity:** 0.29257547208236784\
+**Text:** 並不是說那些不光彩的工作本身就是好的。但當你發現自己被某種工作吸引，儘管它目前缺乏聲望，這既是證明那裡有真正可以發掘的東西，也是證明你擁有正確的動機。不純的動機對有抱負的人來說是很大的危險。如果什麼會讓你走偏，那就是想給人留下深刻印象的慾望。所以，雖然在非享有聲望的事情上工作並不保證你走在正確的軌道上，但它至少保證你不會走在最常見的錯誤軌道上。
+
+在接下來的幾年裡，我寫了很多關於各種不同主題的文章。O’Reilly 將其中一篇文章收錄在了一本書中，書名是 Hackers & Painters，該書中有一篇這樣的文章。我也做過垃圾郵件過濾器，還畫了一些畫。我以前每週四晚上都會和一群朋友共進晚餐，這讓我學會了如何為一群人做飯。我還在劍橋買了一棟別墅，一間前糖果工廠…
+
+```
+retriever = index.as_retriever(
+    vector_store_query_mode="mmr",
+    similarity_top_k=3,
+    vector_store_kwargs={"mmr_threshold": 1.0},
+)
+nodes = retriever.retrieve(
+    "What did the author do during his time in Y Combinator?"
+)
+```
+
+```
+for n in nodes:
+    display_source_node(n, source_length=1000)
+```
+
+**Node ID:** 72313b35-f0dc-4abb-919c-a440aebf0398\
+**Similarity:** 0.5985031885642463\**Text:** 潔西卡和我在三月十一日晚餐後回家時，在 Garden 和 Walker 街的拐角，這三條線匯合了。管那些花費太久才下定決心的 VC 們去吧。我們自己創立一家投資公司，並真正實施我們一直在談論的想法。我來資助，潔西卡可以辭掉她的工作從事這件事，我們也能讓 Robert 和 Trevor 成為合夥人。\[13]
+
+再次，無知對我們有利。我們完全不知道如何成為天使投資人，在 2005 年的波士頓，沒有 Ron Conway 可以向我們學習。所以我們只是做了看似明顯的選擇，而我們做的一些事情後來被證明是新穎的。
+
+Y Combinator 有多個組成部分，我們沒有一次都想清楚所有事情。我們首先弄清楚的部分是成為一家天使公司。在那個時候，這兩個詞並不常一起出現。有 VC 公司，它們是組織過的公司，有專門負責投資的人，但它們只做大額的、數百萬美元的投資……
+
+**Node ID:** 555f8603-79f5-424c-bfef-b7a8d9523d4c\
+**Similarity:** 0.5814802966348447\
+**Text:** \[15] 我們收到了 225 份夏季創辦人計畫的申請，我們很驚訝地發現其中很多來自已經畢業，或即將畢業的群體。這個 SFP 項目開始變得比我們預期的更嚴肅了。
+
+我們邀請了 225 個群體中的約 20 個進行面談，從中選出了 8 個來資助。他們是一個令人印象深刻的群體。第一批包括 reddit、Justin Kan 和 Emmett Shear，他們後來創立了 Twitch；Aaron Swartz，他已經幫助撰寫了 RSS 規範，幾年後成為了開放獲取（open access）的殉道者；以及 Sam Altman，他後來成為 YC 的第二任總裁。我不認為第一批這麼好的結果完全是偶然。你必須非常大膽地報名參加像夏季創辦人計畫這樣奇怪的東西，而不是去微軟或高盛這樣正經的地方找暑期工作。
+
+對於新創公司的交易是基於我們與 Julian 進行的交易（10% 的 10,000 美元）以及……
+
+**Node ID:** 23010353-0f2b-4c4f-9ff0-7c1f1201edac\
+**Similarity:** 0.562748668285032\
+**Text:** 當我處理 YC 期間的一些緊急問題時，有大約 60% 的機率與 HN 有關，40% 的機率與其他所有事情的組合有關。\[17]
+
+除了 HN，我使用 Arc 寫了 YC 的所有內部軟體。但雖然我繼續在 Arc 上工作了一段時間，我逐漸停止在 Arc 上工作，部分原因是沒有時間，部分原因是由於我們所有這些基礎設施都依賴於它，現在在玩這個語言變得不那麼有吸引力了。所以現在我的三個專案減少為兩個：寫文章和在 YC 上工作。
+
+YC 與我做過的其他類型的工作不同。而不是由我自己決定要從事什麼，問題會找上我來。每六個月都會有一批新的新創公司，他們的問題，無論是什麼，都會成為我們的問題。這是一項非常引人入勝的工作，因為他們的問題非常多樣化，而優秀的創辦人非常有效。如果你想在短時間內學到盡可能多的關於新創公司的知識……

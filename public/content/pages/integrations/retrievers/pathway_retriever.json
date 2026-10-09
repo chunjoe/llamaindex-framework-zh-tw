@@ -1,0 +1,52 @@
+{
+  "route": "/python/framework/integrations/retrievers/pathway_retriever/",
+  "sourceUrl": "https://developers.llamaindex.ai/python/framework/integrations/retrievers/pathway_retriever/",
+  "title": "Pathway Retriever",
+  "sourceTitle": "Pathway Retriever",
+  "description": "",
+  "markdown": "> [Pathway](https://pathway.com/) 是開放式資料處理框架，讓您能輕鬆建立資料轉換管線與機器學習應用程式，並連接即時資料來源與持續變動的資料。\n\n這份筆記示範如何透過 `LlamaIndex` 使用即時資料索引管線。您可以在 LLM 應用程式中使用提供的 `PathwayRetriever` 查詢管線結果。Pathway 會在資料變更時於背景更新索引，讓回答隨時保持最新。\n\n本筆記會使用[公開的文件處理示範管線](https://pathway.com/solutions/ai-pipelines#try-it-out)，這個管線會：\n\n1. 監控多個雲端資料來源的變更。\n2. 為資料建立向量索引。\n\n若要使用自己的文件處理管線，請參閱[代管服務](https://pathway.com/solutions/ai-pipelines)，或依照本筆記[自行建置](https://pathway.com/developers/user-guide/llm-xpack/vectorstore_pipeline/)。\n\n接著使用 `llama_index.retrievers.pathway.PathwayRetriever` 檢索器連接索引；它實作了 `retrieve` 介面。\n\n本文件介紹的基本管線，能讓您輕鬆為雲端位置中的檔案建立簡易索引。Pathway 也提供建置即時資料管線與應用程式所需的完整功能，包括類似 SQL 的表格操作（例如 groupby-reductions）、合併不同資料來源、依時間分組與視窗化，以及多種連接器。\n\n如需 Pathway 資料匯入管線與向量儲存區的詳細資訊，請參閱[向量儲存管線](https://pathway.com/developers/showcases/vectorstore_pipeline)。\n\n## 前置需求\n\n若要使用 `PathwayRetrievier`，必須先安裝 `llama-index-retrievers-pathway` 套件。\n\n```\n!pip install llama-index-retrievers-pathway\n```\n\n## 在 llama-index 中建立檢索器\n\n若要建立並設定 `PathwayRetriever`，請提供文件索引管線的 `url`，或其 `host` 與 `port`。以下範例使用公開的[示範管線](https://pathway.com/solutions/ai-pipelines#try-it-out)，其 REST API 位於 `https://demo-document-indexing.pathway.stream`。此示範會從 [Google Drive](https://drive.google.com/drive/u/0/folders/1cULDv2OaViJBmOfG5WB0oWcgayNrGtVs) 和 [Sharepoint](https://navalgo.sharepoint.com/sites/ConnectorSandbox/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2FConnectorSandbox%2FShared%20Documents%2FIndexerSandbox\\&p=true\\&ga=1) 匯入文件，並維護供檢索使用的索引。\n\n```\nfrom llama_index.retrievers.pathway import PathwayRetriever\n\n\nretriever = PathwayRetriever(\n    url=\"https://demo-document-indexing.pathway.stream\"\n)\nretriever.retrieve(str_or_query_bundle=\"what is pathway\")\n```\n\n**換您試試！** 您可以[取得自己的管線](https://pathway.com/solutions/ai-pipelines)，或將[新文件](https://chat-realtime-sharepoint-gdrive.demo.pathway.com/)上傳到示範管線，再重新執行查詢。\n\n## 在 Query Engine 中使用\n\n```\nfrom llama_index.core.query_engine import RetrieverQueryEngine\n\n\nquery_engine = RetrieverQueryEngine.from_args(\n    retriever,\n)\n```\n\n```\nresponse = query_engine.query(\"Tell me about Pathway\")\nprint(str(response))\n```\n\n## 建置自己的資料處理管線\n\n### 前置需求\n\n安裝 `pathway` 套件，接著下載範例資料。\n\n```\n%pip install pathway\n%pip install llama-index-embeddings-openai\n```\n\n```\n!mkdir -p 'data/'\n!wget 'https://gist.githubusercontent.com/janchorowski/dd22a293f3d99d1b726eedc7d46d2fc0/raw/pathway_readme.md' -O 'data/pathway_readme.md'\n```\n\n### 定義由 Pathway 追蹤的資料來源\n\nPathway 可以同時監聽多種資料來源的變更，例如本機檔案、S3 資料夾、雲端儲存空間，以及各種資料串流。\n\n詳細資訊請參閱 [pathway-io](https://pathway.com/developers/api-docs/pathway-io)。\n\n```\nimport pathway as pw\n\n\ndata_sources = []\ndata_sources.append(\n    pw.io.fs.read(\n        \"./data\",\n        format=\"binary\",\n        mode=\"streaming\",\n        with_metadata=True,\n    )  # This creates a `pathway` connector that tracks\n    # all the files in the ./data directory\n)\n\n\n# This creates a connector that tracks files in Google drive.\n# please follow the instructions at https://pathway.com/developers/tutorials/connectors/gdrive-connector/ to get credentials\n# data_sources.append(\n#     pw.io.gdrive.read(object_id=\"17H4YpBOAKQzEJ93xmC2z170l0bP2npMy\", service_user_credentials_file=\"credentials.json\", with_metadata=True))\n```\n\n### 建立文件索引管線\n\n接著建立文件索引管線。`transformations` 應為一個 `TransformComponent` 清單，並以 `Embedding` 轉換結尾。\n\n本例先使用 `TokenTextSplitter` 切分文字，再透過 `OpenAIEmbedding` 產生嵌入。\n\n```\nfrom pathway.xpacks.llm.vector_store import VectorStoreServer\nfrom llama_index.embeddings.openai import OpenAIEmbedding\nfrom llama_index.core.node_parser import TokenTextSplitter\n\n\nembed_model = OpenAIEmbedding(embed_batch_size=10)\n\n\ntransformations_example = [\n    TokenTextSplitter(\n        chunk_size=150,\n        chunk_overlap=10,\n        separator=\" \",\n    ),\n    embed_model,\n]\n\n\nprocessing_pipeline = VectorStoreServer.from_llamaindex_components(\n    *data_sources,\n    transformations=transformations_example,\n)\n\n\n# Define the Host and port that Pathway will be on\nPATHWAY_HOST = \"127.0.0.1\"\nPATHWAY_PORT = 8754\n\n\n# `threaded` runs pathway in detached mode, we have to set it to False when running from terminal or container\n# for more information on `with_cache` check out https://pathway.com/developers/api-docs/persistence-api\nprocessing_pipeline.run_server(\n    host=PATHWAY_HOST, port=PATHWAY_PORT, with_cache=False, threaded=True\n)\n```\n\n### 將檢索器連接到自訂管線\n\n```\nfrom llama_index.retrievers.pathway import PathwayRetriever\n\n\nretriever = PathwayRetriever(host=PATHWAY_HOST, port=PATHWAY_PORT)\nretriever.retrieve(str_or_query_bundle=\"what is pathway\")\n```\n",
+  "headings": [
+    {
+      "level": 2,
+      "id": "prerequisites",
+      "text": "前置需求"
+    },
+    {
+      "level": 2,
+      "id": "create-retriever-for-llama-index",
+      "text": "在 llama-index 中建立檢索器"
+    },
+    {
+      "level": 2,
+      "id": "use-in-query-engine",
+      "text": "在 Query Engine 中使用"
+    },
+    {
+      "level": 2,
+      "id": "building-your-own-data-processing-pipeline",
+      "text": "建置自己的資料處理管線"
+    },
+    {
+      "level": 3,
+      "id": "prerequisites-1",
+      "text": "前置需求"
+    },
+    {
+      "level": 3,
+      "id": "define-data-sources-tracked-by-pathway",
+      "text": "定義由 Pathway 追蹤的資料來源"
+    },
+    {
+      "level": 3,
+      "id": "create-the-document-indexing-pipeline",
+      "text": "建立文件索引管線"
+    },
+    {
+      "level": 3,
+      "id": "connect-the-retriever-to-the-custom-pipeline",
+      "text": "將檢索器連接到自訂管線"
+    }
+  ],
+  "pipelineVersion": 4,
+  "sourceHash": "6a192804a17d5fdc5140e8be8a15a2731f1877064e69e30a9a4990d309afc825"
+}

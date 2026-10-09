@@ -1,0 +1,114 @@
+---
+title: "AnalyticDB"
+---
+
+> [AnalyticDB for PostgreSQL](https://www.alibabacloud.com/help/en/analyticdb-for-postgresql/product-overview/overview-product-overview) 是一個大規模平行處理 (MPP) 資料倉儲服務，專為線上分析大量資料而設計。
+
+要執行此 notebook，您需要在雲端運行一個 AnalyticDB for PostgreSQL 實例（您可以在 [common-buy.aliyun.com](https://common-buy.aliyun.com/?commodityCode=GreenplumPost\&regionId=cn-hangzhou\&request=%7B%22instance_rs_type%22%3A%22ecs%22%2C%22engine_version%22%3A%226.0%22%2C%22seg_node_num%22%3A%224%22%2C%22SampleData%22%3A%22false%22%2C%22vector_optimizor%22%3A%22Y%22%7D) 取得）。
+
+建立實例後，您應透過 [API](https://www.alibabacloud.com/help/en/analyticdb-for-postgresql/developer-reference/api-gpdb-2016-05-03-createaccount) 或實例詳細頁面中的「Account Management」建立管理帳戶。
+
+您應確保已安裝 `llama-index`：
+
+```
+%pip install llama-index-vector-stores-analyticdb
+```
+
+```
+!pip install llama-index
+```
+
+### 請提供參數：
+
+```
+import os
+import getpass
+
+
+# alibaba cloud ram ak and sk:
+alibaba_cloud_ak = ""
+alibaba_cloud_sk = ""
+
+
+# instance information:
+region_id = "cn-hangzhou"  # region id of the specific instance
+instance_id = "gp-xxxx"  # adb instance id
+account = "test_account"  # instance account name created by API or 'Account Management' at the instance detail web page
+account_password = ""  # instance account password
+```
+
+### 匯入所需的套件依賴：
+
+```
+from llama_index.core import (
+    VectorStoreIndex,
+    SimpleDirectoryReader,
+    StorageContext,
+)
+from llama_index.vector_stores.analyticdb import AnalyticDBVectorStore
+```
+
+### 載入一些範例資料：
+
+```
+!mkdir -p 'data/paul_graham/'
+!wget 'https://raw.githubusercontent.com/run-llama/llama_index/main/docs/examples/data/paul_graham/paul_graham_essay.txt' -O 'data/paul_graham/paul_graham_essay.txt'
+```
+
+### 讀取資料：
+
+```
+# load documents
+documents = SimpleDirectoryReader("./data/paul_graham/").load_data()
+print(f"Total documents: {len(documents)}")
+print(f"First document, id: {documents[0].doc_id}")
+print(f"First document, hash: {documents[0].hash}")
+print(
+    "First document, text"
+    f" ({len(documents[0].text)} characters):\n{'='*20}\n{documents[0].text[:360]} ..."
+)
+```
+
+### 建立 AnalyticDB Vector Store 物件：
+
+```
+analytic_db_store = AnalyticDBVectorStore.from_params(
+    access_key_id=alibaba_cloud_ak,
+    access_key_secret=alibaba_cloud_sk,
+    region_id=region_id,
+    instance_id=instance_id,
+    account=account,
+    account_password=account_password,
+    namespace="llama",
+    collection="llama",
+    metrics="cosine",
+    embedding_dimension=1536,
+)
+```
+
+### 從 Documents 建構索引：
+
+```
+storage_context = StorageContext.from_defaults(vector_store=analytic_db_store)
+
+
+index = VectorStoreIndex.from_documents(
+    documents, storage_context=storage_context
+)
+```
+
+### 使用索引進行查詢：
+
+```
+query_engine = index.as_query_engine()
+response = query_engine.query("Why did the author choose to work on AI?")
+
+
+print(response.response)
+```
+
+### 刪除集合：
+
+```
+analytic_db_store.delete_collection()
+```

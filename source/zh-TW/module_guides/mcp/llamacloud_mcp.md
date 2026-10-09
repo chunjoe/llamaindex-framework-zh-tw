@@ -1,0 +1,303 @@
+---
+title: "LlamaParse MCP"
+description: "透過 MCP 整合，可將 LlamaParse Platform 連接至任何 MCP 用戶端。"
+---
+
+LlamaParse MCP 是一個 [模型 內容 協定](https://modelcontextprotocol.io/) 伺服器，將 LlamaParse 平台的 document 處理能力（Parse、Classify、Extract、Split 與 Index）以工具形式提供，讓任何相容於 MCP 的 agent 都能夠呼叫。您不需要自行串接 REST API 或 SDK，只需將您的 agent 連接至 MCP 伺服器一次，即可直接讓它解析 documents、提取結構化資料、對檔案進行分類與分割，以及建立、更新和從索引中檢索資料。
+
+此伺服器為開源專案，託管於 [`https://mcp.llamaindex.ai`](https://mcp.llamaindex.ai/)。
+
+注意
+
+`mcp.llamaindex.ai` 服務於北美地區，`mcp.eu.llamaindex.ai` 則服務於歐洲。您使用哪一個伺服器取決於您的 LlamaCloud 帳號所在地，而非單次連線設定：`cloud.llamaindex.ai` 的帳號使用北美伺服器，`cloud.eu.llamaindex.ai` 的帳號則使用歐洲伺服器。在其中一個區域核發的 token 會被另一個區域拒絕，並回傳一個包含正確 endpoint 的 `401`。請參閱 [Regions](https://developers.llamaindex.ai/python/framework/module_guides/general/regions/) 以取得完整的區域 endpoint 列表。
+
+## Authentication
+
+MCP 伺服器接受兩種憑證，兩者皆對應至相同的帳號與權限。
+
+**OAuth** 是大多數 MCP 用戶端所使用的方式，除非您額外加入 header，否則本頁面上的所有設定均使用 OAuth。您只需在用戶端登入一次；首次使用時會自動進行驗證，且 token 會自動更新，無需手動干預。
+
+**LlamaCloud API key** 適用於無法使用瀏覽器登入的場景，例如 headless agents、CI 工作流程以及不支援 OAuth 的用戶端。在新增伺服器時，請將其作為 bearer token 發送：
+
+終端機視窗
+
+```
+claude mcp add --transport http llamaparse https://mcp.llamaindex.ai/mcp \
+  --header "Authorization: Bearer $LLAMA_CLOUD_API_KEY"
+```
+
+請參閱 [API 金鑰指南](https://developers.llamaindex.ai/python/framework/module_guides/general/api_key/) 以建立 key。
+
+兩者唯一的區別在於：`getUploadUrl` 不對使用 API-key 的呼叫者開放，因為它會儲存呼叫者的憑證以供 upload route 使用 —— 對於 expiring token 是有限制的，而對 key 則是無限制的。請改用 `uploadFileByUrl` 或透過 OAuth 連接。
+
+## Connecting 與 MCP client
+
+連接至統一 endpoint `https://mcp.llamaindex.ai/mcp`，即可在單一伺服器中獲得完整的平台功能（Parse, Classify, Extract, Split, and Index）。
+
+- [Cursor](/python/framework/module_guides/mcp/llamacloud_mcp/)
+- [VS Code](/python/framework/module_guides/mcp/llamacloud_mcp/)
+- [Claude Code](/python/framework/module_guides/mcp/llamacloud_mcp/)
+- [Claude](/python/framework/module_guides/mcp/llamacloud_mcp/)
+- [Codex](/python/framework/module_guides/mcp/llamacloud_mcp/)
+
+點擊按鈕即可一鍵新增伺服器：
+
+[在 Cursor ](cursor://anysphere.cursor-deeplink/mcp/install?name=llamaparse\&config=eyJ1cmwiOiJodHRwczovL21jcC5sbGFtYWluZGV4LmFpL21jcCJ9) 中開啟 
+
+或手動將伺服器新增至 `~/.cursor/mcp.json`：
+
+```
+{
+  "mcpServers": {
+    "llamaparse": {
+      "type": "http",
+      "url": "https://mcp.llamaindex.ai/mcp"
+    }
+  }
+}
+```
+
+點擊按鈕即可一鍵新增伺服器：
+
+[在 VS Code ](vscode:mcp/install?%7B%22name%22%3A%22llamaparse%22%2C%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A//mcp.llamaindex.ai/mcp%22%7D)中開啟 
+
+或手動將伺服器新增至您的 `settings.json`：
+
+```
+{
+  "mcp": {
+    "servers": {
+      "llamaparse": {
+        "type": "http",
+        "url": "https://mcp.llamaindex.ai/mcp"
+      }
+    }
+  }
+}
+```
+
+終端機視窗
+
+```
+claude mcp add --transport http llamaparse https://mcp.llamaindex.ai/mcp
+```
+
+LlamaParse 已列在 Claude 的 connector 目錄中，因此無需設定。在 Claude 中，前往 **Customize → Connectors**，搜尋 LlamaParse 並連接。此目錄在網頁版 Claude、Claude Desktop 和 Claude 行動版之間共用，因此連接一次即可涵蓋所有平台。
+
+[在 Claude Desktop ](claude://claude.ai/settings/connectors)
+ 中開啟 connectors
+該列表連接至北美伺服器。若要使用歐洲伺服器或指定特定產品的 endpoint，請在 **Customize → Connectors** 下自行新增，或編輯 Claude Desktop 的 `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) 或 `%APPDATA%\Claude\claude_desktop_config.json` (Windows)。以下設定使用北美統一 endpoint —— 若要使用歐洲伺服器，請將 host 替換為 `https://mcp.eu.llamaindex.ai/mcp`；若要使用如 `/parse/mcp` 等特定產品伺服器，請替換 path：
+
+```
+{
+  "mcpServers": {
+    "llamaparse": {
+      "type": "http",
+      "url": "https://mcp.llamaindex.ai/mcp"
+    }
+  }
+}
+```
+
+開啟 Codex settings 以新增伺服器：
+
+[在 Codex ](codex://settings) 中開啟 
+
+或透過 CLI 新增：
+
+終端機視窗
+
+```
+codex mcp add llamaparse --url https://mcp.llamaindex.ai/mcp
+```
+
+如果您使用 OAuth 連接，當您的 agent 首次使用工具時，系統會提示您透過瀏覽器進行驗證。
+
+### EU region歐洲地區的帳號請連接至 `https://mcp.eu.llamaindex.ai/mcp`。其工具介面與 OAuth 流程與北美地區完全相同，僅主機 (host) 不同。由於 Claude connector 的目錄列表指向北美伺服器，因此歐洲帳號需手動新增伺服器，而非從目錄中安裝。
+
+點擊按鈕即可一鍵新增歐洲伺服器：
+
+[在 Cursor  ](cursor://anysphere.cursor-deeplink/mcp/install?name=llamaparse\&config=eyJ1cmwiOiJodHRwczovL21jcC5ldS5sbGFtYWluZGV4LmFpL21jcCJ9)[Open 中開啟 VS Code ](vscode:mcp/install?%7B%22name%22%3A%22llamaparse%22%2C%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A//mcp.eu.llamaindex.ai/mcp%22%7D)
+
+或者手動新增伺服器，請使用與上述相同的檔案格式與路徑 —— 對於 Cursor，路徑為 `~/.cursor/mcp.json`：
+
+```
+{
+  "mcpServers": {
+    "llamaparse-eu": {
+      "type": "http",
+      "url": "https://mcp.eu.llamaindex.ai/mcp"
+    }
+  }
+}
+```
+
+透過 CLI：
+
+終端機視窗
+
+```
+# Claude Code
+claude mcp add --transport http llamaparse-eu https://mcp.eu.llamaindex.ai/mcp
+
+
+# Codex
+codex mcp add llamaparse-eu --url https://mcp.eu.llamaindex.ai/mcp
+```
+
+使用 `llamaparse-eu` 名稱可將歐洲伺服器與指向北美的 `llamaparse` 項目區分開來，使兩者能同時安裝。上述的一鍵安裝按鈕會以 `llamaparse` 為名稱進行安裝，如果您已經設定了北美伺服器，請重新命名該項目。
+
+## Available tools
+
+伺服器將工具按產品分組。下方的 project 與 upload 輔助工具由每個 endpoint（包括統一 endpoint 與各產品專屬 endpoint）提供，因為所有處理工具都需要檔案 ID，且對於擁有一個以上 project 的帳號，還需要 project ID。
+
+### Projects 且上傳 
+
+- **`getUserProjects`** — 列出您的帳號可存取的 project，以便 agent 能透過名稱解析 project 並將正確的 project ID 傳遞給其他工具。
+- **`uploadFileByUrl`** — 接收公開的檔案 URL、擷取檔案並將其上傳至平台。
+- **`getUploadUrl`** — 回傳一個暫時的、經過驗證的上傳 endpoint，您的 client 可透過 multipart form data 將本地檔案 `POST` 至該 endpoint。
+
+### Parse
+
+- **`parseFile`** — 對檔案執行 [Parse](https://developers.llamaindex.ai/python/framework/module_guides/parse/getting_started/) 作業，並回傳乾淨的 markdown 或純文字。
+- **`parseWithLiteParse`** — 對 PDF 執行 LiteParse，這是一個快速且不消耗 Parse 額度的解析器。僅支援 PDF，且最適用於版面簡單、文字密集之 documents。
+- **`estimateFileComplexity`** — 逐頁對 PDF 進行評分，並針對每頁回傳所需的 Parse tier 或 LiteParse 是否已足夠。可將其與 `parseFile` 及 `parseWithLiteParse` 搭配使用，僅將有需要的頁面傳送到較高階的 tier。
+
+### Classify
+
+- **`classifyFile`** — 使用 [Classify](https://developers.llamaindex.ai/python/framework/module_guides/classify/) 將 document 分配至您的其中一個類別。在統一伺服器與 Classify 伺服器上，類別是每次呼叫的必填參數，因此 agent 可以針對每個檔案決定類別，而無需先建立儲存的設定。在 pinned `/classify/{configId}/mcp` 伺服器上，類別則來自設定，且不提供該參數。
+
+### Split
+
+- **`splitFile`** — 使用 [Split](https://developers.llamaindex.ai/python/framework/module_guides/split/getting_started/) 將 document 分割成邏輯區段。與 `classifyFile` 類似，它採取 inline 傳遞類別，但在 pinned `/split/{configId}/mcp` 伺服器上除外。
+
+### Extract
+
+相較於要求 agent 閱讀解析後的 document 並從文字中提取欄位，使用專用工具進行 [Structured extraction](https://developers.llamaindex.ai/python/framework/module_guides/extract/) 會更可靠：agents 可能僅接收到大型 documents 的截斷版本，且僅靠 prompt 提取會導致輸出 schema 定義不足。
+
+- **`searchSchemaTemplates`** — 在內建的起始 schema 目錄（如發票、合約、履歷等）中搜尋，並回傳匹配項及其 template ID。
+- **`getSchemaTemplate`** — 透過 ID 回傳單一 template 的完整 JSON schema，以便 agent 在使用前閱讀並調整。
+- **`createExtractionConfigFromSchema`** — 透過 template ID 或明確的 JSON schema 建立提取設定，並回傳 configuration ID。此工具可讓 agent 即時建立設定。
+- **`generateExtractionConfig`** — 使用範例檔案，根據您想要的資料描述生成 JSON schema 與提取規則。同樣會回傳 configuration ID。
+- **`extractFile`** — 使用提取設定 ID 對檔案執行提取。
+
+### Index[Index](https://developers.llamaindex.ai/python/framework/module_guides/cloud-index-v2/getting_started/) 是由 LlamaParse Platform 提供的託管知識庫，專為 agentic workflows 設計。除了 semantic search 之外，它還為 agents 提供類似檔案系統的存取方式來操作底層的 documents。相關工具涵蓋了這兩個面向：建立 index 與查詢 index。
+
+Index 是建立在來源 documents 的目錄之上，因此建立流程為：上傳檔案、將其放入目錄，然後進行 index：
+
+- **`createDirectory`** — 建立一個目錄，即建立 index 時所依據的來源 documents 資料夾。
+- **`addFilesToDirectory`** — 使用上傳輔助工具回傳的檔案 ID，將已上傳的檔案新增至目錄中。檔案會逐一新增，且回應會報告哪些檔案成功，以便您僅針對失敗的項目重試。
+- **`createIndex`** — 對目錄進行 index。Indexing 在背景執行，且在報告為 ready 之前無法進行查詢。
+- **`syncIndex`** — 重新對目錄進行 index，以納入自上次執行以來新增或變更的檔案。Index 不會自動更新，因此這是讓現有 index 偵測到新 documents 的方式。
+- **`getIndexStatus`** — 報告 index 是否已完成建立。查詢尚未 ready 的 index 與查詢沒有匹配 documents 的 index 結果相同，因此請在 `createIndex` 和 `syncIndex` 之後輪詢此工具。
+- **`listDirectories`** — 分頁列出專案中的目錄。
+- **`listDirectory`** — 分頁列出目錄內的檔案。
+
+搜尋與讀取 index：
+
+- **`listIndexes`** — 發現您可以查詢的 index。
+- **`findFilesInIndex`** — 在 index 中定位相關檔案。
+- **`readFileFromIndex`** — 讀取 index 中檔案的內容。
+- **`grepFileFromIndex`** — 在已 index 的檔案中搜尋模式匹配。
+- **`retrieveFromIndex`** — 在 index 上執行 hybrid (sparse + dense) retrieval。
+
+### API keys
+
+僅由統一的 `/mcp` endpoint 提供 — 特定產品的伺服器不會公開此功能。
+
+- **`createProjectApiKey`** — 建立一個範圍限定於單一專案的 API key，用於交付給應用程式或團隊成員。該 key 僅能存取該專案，因此 agent 可以直接完成專案設定，而無需停下來向您請求 key。Secret 僅會回傳一次且無法再次讀取 — 請在回傳時立即儲存，否則必須撤銷該 key 並重新建立。此工具建立的所有 key 都會過期；預設值與此工具可發行的最長期限均為 90 天。Web UI 提供更長的有效期，最高可設定為永不過期。
+
+## Product 專屬伺服器 
+
+統一的 `/mcp` endpoint 提供所有功能，非常適合探索性工作和更廣泛的 document 處理任務。如果您需要更精簡的工具清單，可以直接連接到特定產品的伺服器。縮小範圍有助於 agents 更可靠地做出工具選擇決定，並平行執行獨立任務。
+
+伺服器樹狀結構如下：
+
+```
+https://mcp.llamaindex.ai/
+├── mcp                       # full platform: Parse, Classify, Extract, Split, Index
+├── parse
+│   └── /mcp
+├── classify
+│   ├── /mcp
+│   └── /{configId}/mcp
+├── extract
+│   ├── /mcp
+│   └── /{configId}/mcp
+├── split
+│   ├── /mcp
+│   └── /{configId}/mcp
+└── index
+    └── /mcp
+```
+
+對於歐洲區域的帳戶，`https://mcp.eu.llamaindex.ai/` 下也存在相同的子路徑。
+
+每個特定產品的伺服器都包含 `getUserProjects` 和兩個上傳輔助工具，以及其專屬工具：
+
+| Server          | 除共用輔助工具外的其他工具                                                                                             |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `/parse/mcp`    | `parseFile`, `parseWithLiteParse`, `estimateFileComplexity`                                                                 |
+| `/classify/mcp` | `classifyFile`                                                                                                              |
+| `/split/mcp`    | `splitFile`                                                                                                                 |
+| `/extract/mcp`  | `searchSchemaTemplates`, `getSchemaTemplate`, `createExtractionConfigFromSchema`, `generateExtractionConfig`, `extractFile` || `/index/mcp`    | 上述列出的每個 Index 工具                                                                                               |
+
+`classify`、`extract` 與 `split` 伺服器可以選擇直接從 route 繼承 configuration ID。當您連線到 `/{configId}/mcp` endpoint 時，agent 會在該 configuration 的 context 下運作：`classifyFile` 從中取得 categories，`splitFile` 取得 categories 與 splitting strategy，而 `extractFile` 則取得其 schema —— 因此 pinned extract server 僅提供 `extractFile`，並捨棄所有 configuration-building 工具。
+
+例如，要將 agent 直接連線到特定的 classification configuration：
+
+```
+{
+  "mcpServers": {
+    "classify-folder-1": {
+      "type": "http",
+      "url": "https://mcp.llamaindex.ai/classify/CONFIG_ID/mcp"
+    }
+  }
+}
+```
+
+同時，連線到特定的 extraction configuration：
+
+```
+{
+  "mcpServers": {
+    "extract-folder-1": {
+      "type": "http",
+      "url": "https://mcp.llamaindex.ai/extract/EXTRACT_CONFIG_ID/mcp"
+    }
+  }
+}
+```
+
+這種模組化模型讓您能由多個專門的伺服器組成 workflows，每個伺服器負責定義明確的任務，藉此提升隔離度、實現更高的平行處理能力，並讓您能精細控制 throughput。
+
+### 選擇 configuration
+
+agent 如何選擇 configuration 取決於產品，因為 Classify 和 Split 在呼叫時會攜帶 configuration，而 Extract 則是參照已儲存的 configuration。
+
+**Classify 和 Split 使用 inline 方式提供 configuration。** `categories` 是每個 `classifyFile` 與 `splitFile` 呼叫的必要參數，因此 agent 會針對每個檔案決定，無需事先儲存。在下次呼叫時傳遞不同的 categories，行為隨之改變。唯一的例外是下文提到的 pinned server，它會提供這些資訊並捨棄該參數。
+
+**Extract 透過 ID 參照 configuration。** `extractFile` 需要 `configurationId`，因此在呼叫前 configuration 必須已存在。agent 有三種方式可以取得：
+
+- 從 starter schema 建立 —— 呼叫 `searchSchemaTemplates` 尋找 template，可選擇使用 `getSchemaTemplate` 讀取並調整，接著使用 `createExtractionConfigFromSchema` 建立 configuration 並取得其 ID。
+- 從範例檔案建立 —— 呼叫 `generateExtractionConfig` 並提供檔案以及您想要的資料描述。
+- 重用已儲存的 configuration —— 從 web UI 的 Extract Configurations 頁面取得現有 configuration 的 ID，並直接傳遞給 `extractFile`。
+
+**或者將 configuration pin 到連線中。** 連線到 `/{configId}/mcp` endpoint 會將 configuration 設定為整個 session 的 context，且 agent 不需再做選擇。當 configuration 固定且您不希望 agent 變更它時，請使用此方式。
+
+目前沒有可用於列出專案中已儲存 configuration 的工具，因此 agent 要麼在 session 期間建立一個，要麼被提供一個 ID 以供使用。
+
+## Example workflows
+
+- **先分類再提取** —— agent 使用 classification server 對資料夾中的檔案進行分類，將其整理到特定類別的子資料夾中，然後針對每個類別平行執行對應的 extraction configuration，並將結果儲存為 JSON 以供後續分析。
+- **Agentic retrieval** —— agent 使用 `listIndexes` 發現 indexes，使用 `findFilesInIndex` 定位相關檔案，使用 `readFileFromIndex` 檢查檔案，使用 `grepFileFromIndex` 搜尋，並使用 `retrieveFromIndex` 檢索 passages —— 像操作檔案系統一樣導覽 PDF、Office documents、圖片和其他非結構化檔案。
+- **從零開始建立知識庫** —— agent 使用 `uploadFileByUrl` 或 `getUploadUrl` 上傳一批檔案，使用 `createDirectory` 與 `addFilesToDirectory` 將其分組，呼叫 `createIndex`，並輪詢 `getIndexStatus` 直到 index 準備就緒，然後對其進行查詢。後續執行時，將檔案新增至相同目錄並呼叫 `syncIndex` 將其併入。
+- **僅解析必要內容** —— agent 對 PDF 執行 `estimateFileComplexity`，將需要較高階層處理的頁面傳送到 `parseFile`，其餘則由 `parseWithLiteParse` 處理。
+
+提示統一的 `/mcp` 伺服器是原型設計的最佳起點。當您確定 workflow 需要哪些功能，且希望縮小範圍或提高平行處理能力時，再改用特定產品的伺服器。
+
+## 相關內容
+
+- [Skills and Plugins](https://developers.llamaindex.ai/python/framework/module_guides/mcp/skills/) — 將 MCP 伺服器與解析 skill 以及 `llamaparse-mcp` plugin 一併安裝，或僅為 coding agent 提供 skills。
+- [LlamaParse Platform n8n Node](https://developers.llamaindex.ai/python/framework/module_guides/mcp/integrations/n8n/) — 在 no-code workflow 中提供與 nodes 相同的功能。

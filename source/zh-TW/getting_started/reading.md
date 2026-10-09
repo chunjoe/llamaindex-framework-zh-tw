@@ -1,0 +1,25 @@
+---
+title: "如何閱讀 LlamaIndex 文件"
+---
+
+歡迎使用 LlamaIndex 文件！我們努力讓這份文件對各種經驗程度的讀者都易於理解，不論你對 LlamaIndex、LLM 或生成式 AI 熟悉與否。
+
+## 開始之前
+
+LlamaIndex 是 Python 程式庫，因此請先安裝 [Python](https://www.python.org/downloads/)，並具備基本的 Python 使用經驗。若你偏好 JavaScript，也可以試用我們的 [TypeScript 套件](https://ts.llamaindex.ai/)。
+
+許多範例以 Notebook 呈現；這裡的 Notebook 指 Jupyter 風格的筆記本。你不必安裝 Jupyter，也能在 [Google Colab](https://colab.research.google.com/) 等託管服務上試用大多數範例。
+
+## 這些文件的結構
+
+本文件依照下列架構編排。你可以從頁面頂端的連結由左至右瀏覽，或點選每頁底端的「下一步」連結，快速了解各部分內容。
+
+1. **開始使用**：你目前所在的章節。即使完全不熟悉 LlamaIndex 和 LLM，我們也會帶你安裝[程式庫](/python/framework/getting_started/installation/)、撰寫第一個只需[五行程式碼](/python/framework/getting_started/starter_example/)的範例、認識 LLM 應用程式的[高階概念](/python/framework/getting_started/concepts/)，接著示範如何[自訂這個五行範例](/python/framework/getting_started/faq/)以符合你的需求。
+
+2. **了解 LlamaIndex**：完成入門章節後，請接著閱讀[了解 LlamaIndex](/python/framework/understanding/)。我們會透過一系列精簡教學，帶你逐步建置可用於正式環境的 LlamaIndex 應用程式，並在過程中加深你對這個程式庫及 LLM 的理解。
+
+3. **使用情境**：如果你是正在評估 LlamaIndex 是否適用於專案的開發者，可以先看[可建置項目的總覽](/python/framework/use_cases/)。
+
+4. **範例**：我們幾乎為所有功能都準備了[豐富的 Notebook 範例](https://developers.llamaindex.ai/python/examples/index.md)。你可以瀏覽這些範例，探索並學習 LlamaIndex 的不同用法。
+
+5. **元件指南**：這些指南深入介紹 LlamaIndex 的各個元件及其用法。請[前往查看](/python/framework/module_guides/)。

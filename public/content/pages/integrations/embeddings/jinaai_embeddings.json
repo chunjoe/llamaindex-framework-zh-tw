@@ -1,0 +1,57 @@
+{
+  "route": "/python/framework/integrations/embeddings/jinaai_embeddings/",
+  "sourceUrl": "https://developers.llamaindex.ai/python/framework/integrations/embeddings/jinaai_embeddings/",
+  "title": "Jina 嵌入模型",
+  "sourceTitle": "Jina Embeddings",
+  "description": "",
+  "markdown": "如果您在 colab 中開啟此 Notebook，您可能需要安裝 LlamaIndex 🦙。\n\n```\n%pip install llama-index-embeddings-jinaai\n%pip install llama-index-llms-openai\n```\n\n```\n!pip install llama-index\n```\n\n您可能還需要 llama-index 沒有直接提供的其他套件。\n\n```\n!pip install Pillow\n```\n\n對於此範例，您需要一個 API 金鑰，該金鑰可以從 <https://jina.ai/embeddings/> 取得。\n\n```\n# Initilise with your api key\nimport os\n\n\njinaai_api_key = \"YOUR_JINAAI_API_KEY\"\nos.environ[\"JINAAI_API_KEY\"] = jinaai_api_key\n```\n\n## 透過 JinaAI 嵌入模型對文本和查詢進行嵌入 API\n\n您可以使用 JinaEmbedding class 來對您的文本和查詢進行編碼。Jina 提供一系列可適應不同用例的模型。\n\n| 模型 | 維度 | 語言 | MRL（套娃式表示學習） | 上下文 |\n| :------------------------: | :-------: | :-------------------------: | :--------------: | :-----: |\n|     jina-embeddings-v3     |    1024   | Multilingual (89 languages) |        Yes       |   8192  |\n| jina-embeddings-v2-base-en |    768    |           English           |        No        |   8192  |\n| jina-embeddings-v2-base-de |    768    |       German & English      |        No        |   8192  |\n| jina-embeddings-v2-base-es |    768    |      Spanish & English      |        No        |   8192  |\n| jina-embeddings-v2-base-zh |    768    |      Chinese & English      |        No        |   8192  |\n\n**推薦模型：jina-embeddings-v3 :**\n\n我們推薦 `jina-embeddings-v3` 作為來自 Jina AI 的最新且表現最佳的嵌入模型。此模型具有 5 個針對特定任務訓練的 adapter，基於其 backbone 進行訓練，以優化各種嵌入用例。\n\n預設情況下，`JinaEmbedding` class 使用 `jina-embeddings-v3`。在 backbone 上，`jina-embeddings-v3` 已經使用 5 個針對不同嵌入用例的特定任務 adapter 進行訓練。\n\n**特定任務 adapter：**\n\n在您的請求中包含 `task` 以優化下游應用程式：\n\n- **retrieval.query**: 用於對檢索任務中的使用者查詢或問題進行編碼。\n- **retrieval.passage**: 用於在索引時對大型 documents 進行編碼。\n- **classification**: 用於對文本進行文本分類任務的編碼。\n- **text-matching**: 用於對文本進行相似度匹配的編碼，例如衡量兩個句子之間的相似度。\n- **separation**: 用於聚類或重新排序任務。\n\n**Matryoshka Representation Learning：**\n\n`jina-embeddings-v3` 支援 Matryoshka Representation Learning，允許使用者在最小的性能損失下控制嵌入維度。在您的請求中包含 `dimensions` 以選擇所需的維度。預設情況下，**dimensions** 設定為 1024，建議的數值在 256 到 1024 之間。您可以參考下表以了解維度與性能的關係：\n\n|                 維度                   |   32  |   64  |  128  |  256  |  512  |  768 |  1024 |\n| :--------------------------------------: | :---: | :---: | :---: | :---: | :---: | :--: | :---: |\n| 平均檢索效能（nDCG\\@10） | 52.54 | 58.54 | 61.64 | 62.72 | 63.16 | 63.3 | 63.35 |\n\n**長上下文嵌入模型的延遲分塊 (Late Chunking)**\n\n`jina-embeddings-v3` 支援 [Late Chunking](https://jina.ai/news/late-chunking-in-long-context-embedding-models/)，這是一種利用模型的長上下文能力來生成上下文分塊嵌入的技術。在您的請求中包含 `late_chunking=True` 以啟用上下文分塊表示。當設定為 true 時，Jina AI API 會將輸入欄位中的所有句子連接成一個字串並將其作為單一字串傳送給模型。在內部，模型會對這個長連接字串進行嵌入，然後執行 late chunking，返回一個與輸入列表大小相符的嵌入列表。\n\n```\nfrom llama_index.embeddings.jinaai import JinaEmbedding\n\n\ntext_embed_model = JinaEmbedding(\n    api_key=jinaai_api_key,\n    model=\"jina-embeddings-v3\",\n    # choose `retrieval.passage` to get passage embeddings\n    task=\"retrieval.passage\",\n)\n\n\nembeddings = text_embed_model.get_text_embedding(\"This is the text to embed\")\nprint(\"Text dim:\", len(embeddings))\nprint(\"Text embed:\", embeddings[:5])\n\n\nquery_embed_model = JinaEmbedding(\n    api_key=jinaai_api_key,\n    model=\"jina-embeddings-v3\",\n    # choose `retrieval.query` to get query embeddings, or choose your desired task type\n    task=\"retrieval.query\",\n    # `dimensions` allows users to control the embedding dimension with minimal performance loss. by default it is 1024.\n    # A number between 256 and 1024 is recommended.\n    dimensions=512,\n)\n\n\nembeddings = query_embed_model.get_query_embedding(\n    \"This is the query to embed\"\n)\nprint(\"Query dim:\", len(embeddings))\nprint(\"Query embed:\", embeddings[:5])\n```\n\n## 透過 JinaCLIP 嵌入圖像和查詢 API\n\n您也可以使用 JinaEmbedding class 來對您的圖像和查詢進行編碼。\n\n```\nfrom llama_index.embeddings.jinaai import JinaEmbedding\nfrom PIL import Image\nimport requests\nfrom numpy import dot\nfrom numpy.linalg import norm\n\n\nembed_model = JinaEmbedding(\n    api_key=jinaai_api_key,\n    model=\"jina-clip-v1\",\n)\n\n\nimage_url = \"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcStMP8S3VbNCqOQd7QQQcbvC_FLa1HlftCiJw&s\"\nim = Image.open(requests.get(image_url, stream=True).raw)\nprint(\"Image:\")\ndisplay(im)\n\n\nimage_embeddings = embed_model.get_image_embedding(image_url)\nprint(\"Image dim:\", len(image_embeddings))\nprint(\"Image embed:\", image_embeddings[:5])\n\n\ntext_embeddings = embed_model.get_text_embedding(\n    \"Logo of a pink blue llama on dark background\"\n)\nprint(\"Text dim:\", len(text_embeddings))\nprint(\"Text embed:\", text_embeddings[:5])\n\n\ncos_sim = dot(image_embeddings, text_embeddings) / (\n    norm(image_embeddings) * norm(text_embeddings)\n)\nprint(\"Cosine similarity:\", cos_sim)\n```\n\n## 分批嵌入\n\n您也可以分批嵌入文本，批次大小可以透過設定 `embed_batch_size` 參數來控制（如果未傳遞，預設值為 10，且不應大於 2048）。\n\n```\nembed_model = JinaEmbedding(\n    api_key=jinaai_api_key,\n    model=\"jina-embeddings-v3\",\n    embed_batch_size=16,\n    task=\"retrieval.passage\",\n)\n\n\nembeddings = embed_model.get_text_embedding_batch(\n    [\"This is the text to embed\", \"More text can be provided in a batch\"]\n)\n\n\nprint(len(embeddings))\nprint(embeddings[0][:5])\n```\n\n## 讓我們使用 Jina AI Embeddings 建構一個 RAG pipeline\n\n#### 下載資料\n\n```\n!mkdir -p 'data/paul_graham/'\n!wget 'https://raw.githubusercontent.com/run-llama/llama_index/main/docs/examples/data/paul_graham/paul_graham_essay.txt' -O 'data/paul_graham/paul_graham_essay.txt'\n```\n\n#### 匯入\n\n```\nimport logging\nimport sys\n\n\nlogging.basicConfig(stream=sys.stdout, level=logging.INFO)\nlogging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))\n\n\nfrom llama_index.core import VectorStoreIndex, SimpleDirectoryReader\n\n\nfrom llama_index.llms.openai import OpenAI\nfrom llama_index.core.response.notebook_utils import display_source_node\n\n\nfrom IPython.display import Markdown, display\n```\n#### 載入資料\n\n```\ndocuments = SimpleDirectoryReader(\"./data/paul_graham/\").load_data()\n```\n\n#### 建置 index\n\n```\nyour_openai_key = \"YOUR_OPENAI_KEY\"\nllm = OpenAI(api_key=your_openai_key)\nembed_model = JinaEmbedding(\n    api_key=jinaai_api_key,\n    model=\"jina-embeddings-v3\",\n    embed_batch_size=16,\n    task=\"retrieval.passage\",\n)\n\n\nindex = VectorStoreIndex.from_documents(\n    documents=documents, embed_model=embed_model\n)\n```\n\n#### 建置 retriever\n\n```\nsearch_query_retriever = index.as_retriever()\n\n\nsearch_query_retrieved_nodes = search_query_retriever.retrieve(\n    \"What happened after the thesis?\"\n)\n```\n\n```\nfor n in search_query_retrieved_nodes:\n    display_source_node(n, source_length=2000)\n```\n",
+  "headings": [
+    {
+      "level": 2,
+      "id": "embed-text-and-queries-with-jina-embedding-models-through-jinaai-api",
+      "text": "透過 JinaAI 嵌入模型對文本和查詢進行嵌入 API"
+    },
+    {
+      "level": 2,
+      "id": "embed-images-and-queries-with-jina-clip-through-jinaai-api",
+      "text": "透過 JinaCLIP 嵌入圖像和查詢 API"
+    },
+    {
+      "level": 2,
+      "id": "embed-in-batches",
+      "text": "分批嵌入"
+    },
+    {
+      "level": 2,
+      "id": "lets-build-a-rag-pipeline-using-jina-ai-embeddings",
+      "text": "讓我們使用 Jina AI Embeddings 建構一個 RAG pipeline"
+    },
+    {
+      "level": 4,
+      "id": "download-data",
+      "text": "下載資料"
+    },
+    {
+      "level": 4,
+      "id": "imports",
+      "text": "匯入"
+    },
+    {
+      "level": 4,
+      "id": "load-data",
+      "text": "載入資料"
+    },
+    {
+      "level": 4,
+      "id": "build-index",
+      "text": "建置 index"
+    },
+    {
+      "level": 4,
+      "id": "build-retriever",
+      "text": "建置 retriever"
+    }
+  ],
+  "pipelineVersion": 4,
+  "sourceHash": "be57d7591fab42b14484c5cf1e7e297ee9ffc6f5b43587a3c2c79f30ab370ac8"
+}

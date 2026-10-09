@@ -1,0 +1,33 @@
+---
+title: "Pydantic 程式"
+---
+
+提示
+
+Pydantic Program 是用於結構化輸出提取的較低層抽象。執行結構化輸出提取的預設方式是使用我們的 LLM classes，這讓您可以輕鬆地將這些 LLMs 嵌入到更高層級的 workflows 中。請查看我們的 [結構化資料擷取教學](/python/framework/understanding/extraction/)。
+
+pydantic program 是一個通用抽象，它接收一個輸入字串並將其轉換為結構化的 Pydantic 物件類型。
+
+由於這個抽象非常通用，它涵蓋了廣泛的 LLM workflows。這些 program 是可組合的，可用於更通用或特定的使用情境。
+
+Pydantic Program 有幾種一般類型：
+
+- **Text Completion Pydantic Programs**：透過 text completion API + output parsing，將輸入文字轉換為使用者指定的結構化物件。
+- **Function Calling Pydantic Programs**：透過 LLM function calling API，將輸入文字轉換為使用者指定的結構化物件。
+- **Prepackaged Pydantic Programs**：將輸入文字轉換為預先指定的結構化物件。
+
+## 文字補完 Pydantic 程式 
+
+請參閱 [LLM Text Completion programs](https://developers.llamaindex.ai/python/examples/output_parsing/llm_program/index.md) 的範例 notebook。
+
+## Function Calling Pydantic Programs
+
+- [Function Calling Pydantic Program](https://developers.llamaindex.ai/python/examples/output_parsing/function_program/index.md)
+- [OpenAI Pydantic Program](https://developers.llamaindex.ai/python/examples/output_parsing/openai_pydantic_program/index.md)
+- [Guidance Pydantic Program](https://developers.llamaindex.ai/python/examples/output_parsing/guidance_pydantic_program/index.md)
+- [Guidance Sub-Question Generator](https://developers.llamaindex.ai/python/examples/output_parsing/guidance_sub_question/index.md)
+
+## Prepackaged Pydantic Programs
+
+- [DF Program](https://developers.llamaindex.ai/python/examples/output_parsing/df_program/index.md)
+- [Evaporate Program](https://developers.llamaindex.ai/python/examples/output_parsing/evaporate_program/index.md)

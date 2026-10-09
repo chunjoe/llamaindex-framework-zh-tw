@@ -1,0 +1,12 @@
+{
+  "changedPages": 0,
+  "assets": {
+    "https://uptrain-assets.s3.ap-south-1.amazonaws.com/images/llamaindex/output.gif": null
+  },
+  "failures": [
+    {
+      "url": "https://uptrain-assets.s3.ap-south-1.amazonaws.com/images/llamaindex/output.gif",
+      "error": "HTTP 403"
+    }
+  ]
+}

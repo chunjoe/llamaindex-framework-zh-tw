@@ -1,0 +1,90 @@
+---
+title: "LlamaIndex Framework"
+description: "LlamaIndex 是 LlamaParse 背後的公司；LlamaParse 是為 AI agents 打造的文件解析平台。LlamaIndex Framework 是我們最初推出、用於 RAG 與 agents 的開源工具套件。"
+---
+
+# LlamaIndex Framework
+
+LlamaIndex 是 LlamaParse 背後的公司；LlamaParse 是為 AI agents 打造的文件解析平台。LlamaIndex Framework 則是我們最初推出、用於 RAG 與 agents 的開源工具套件。
+
+[開始教學 ](/python/framework/getting_started/starter_example/)[安裝 ](/python/framework/getting_started/installation/)[ GitHub](https://github.com/run-llama/llama_index)
+
+## 簡介
+
+LlamaIndex Framework 是一套 Python 工具，可用來在您的資料上打造由 LLM 驅動的 agents。LLM 是以公開資料訓練，而不是以您的資料訓練。您的資料可能存放在 API 後端、資料庫中，或困在 PDF 與投影片裡。上下文增補（context augmentation）會在模型產生回答時，將這些資料提供給模型；其中最廣為人知的形式是[檢索增強生成（RAG）](/python/framework/getting_started/concepts/)。這個框架提供打造各種上下文增補應用所需的元件，從原型一路支援到正式環境；它也是將 [LlamaParse](https://developers.llamaindex.ai/llamaparse/index.md) 解析後的文件交給能運用這些資料的 agent 的最直接途徑。
+
+- **[Agents](/python/framework/understanding/agent/)** 是由 LLM 驅動的助理，會使用工具完成任務，例如根據您的文件回答問題，或在其他系統中採取行動。RAG pipeline 是 agent 可以呼叫的眾多工具之一。
+- **[Workflows](https://developers.llamaindex.ai/python/llamaagents/workflows/)** 是事件驅動的多步驟流程，結合 agents、資料連接器與工具，並支援分支、重試及人工參與審查，也能部署為服務。
+
+此框架由可組合的元件構成。高階 API 只需幾行程式碼，就能讓您從文件取得答案；低階 API 則可讓您自訂或替換任何元件。
+
+[ 資料連接器 ](/python/framework/module_guides/loading/)[ 索引與向量儲存庫 ](/python/framework/module_guides/indexing/)[ 查詢與聊天引擎 ](/python/framework/module_guides/querying/)[ Agents 與工具 ](/python/framework/module_guides/deploying/agents/)[ Workflows ](https://developers.llamaindex.ai/python/llamaagents/workflows/)[ 模型、評估與可觀測性](/python/framework/module_guides/models/)
+
+剛接觸 LlamaIndex？[入門教學](/python/framework/getting_started/starter_example/)會示範如何建立一個能使用您文件的工具的 agent；[本機模型教學](/python/framework/getting_started/starter_example_local/)則會在不使用託管 API 的情況下完成相同目標；[文件導覽](/python/framework/getting_started/reading/)會依照您的經驗程度，指引您閱讀合適的章節。[學習](/python/framework/understanding/)部分則會逐步帶您完成一個完整應用程式。
+
+## 遇到複雜文件時
+
+框架內建的讀取器處理乾淨文字沒有問題。遇到掃描 PDF、表單、試算表和投影片時，索引內容的品質會直接影響每個答案的品質。這正是 [LlamaParse](https://developers.llamaindex.ai/llamaparse/index.md) 的用途：[Parse](https://developers.llamaindex.ai/llamaparse/parse/index.md)（針對掃描文件、表格與圖表的 agentic OCR）、[Extract](https://developers.llamaindex.ai/llamaparse/extract/index.md)（依照您的 schema 擷取 JSON）、[Classify](https://developers.llamaindex.ai/llamaparse/classify/index.md)、[Split](https://developers.llamaindex.ai/llamaparse/split/index.md) 和 [Index](https://developers.llamaindex.ai/llamaparse/cloud-index-v2/getting_started/index.md)（代管式匯入與檢索）。解析完成的頁面可直接加入框架索引：
+
+終端機視窗
+
+```
+pip install llama-index "llama-cloud>=2.8"
+export LLAMA_CLOUD_API_KEY=llx-...
+export OPENAI_API_KEY=sk-...
+```
+
+OpenAI API 金鑰用於建立索引；預設會使用 OpenAI 為頁面產生嵌入向量。若要改用本機嵌入向量，請依照[本機模型教學](/python/framework/getting_started/starter_example_local/)的說明設定 `Settings.embed_model`。
+
+```
+from llama_cloud import LlamaCloud
+from llama_index.core import Document, VectorStoreIndex
+
+
+client = LlamaCloud()  # reads LLAMA_CLOUD_API_KEY
+
+
+file = client.files.create(file="data/report.pdf", purpose="parse")
+result = client.parsing.parse(
+    file_id=file.id, tier="agentic", version="latest", expand=["markdown"]
+)
+pages = result.markdown.pages
+documents = [Document(text=p.markdown) for p in pages if p.success]
+
+
+index = VectorStoreIndex.from_documents(documents)
+```
+
+接下來，這個索引就和其他工具一樣：[入門教學](/python/framework/getting_started/starter_example/)會示範如何將它交給 agent 使用。
+
+若要使用全代管式檢索，[Index](https://developers.llamaindex.ai/llamaparse/cloud-index-v2/getting_started/index.md) 會讓索引與資料來源保持同步，並將檢索結果提供給 query engine 或 agent。若要在自己的電腦上解析文件，[LiteParse](https://developers.llamaindex.ai/liteparse/index.md) 是開源的本機方案。
+
+## 複雜文件進，乾淨 Markdown 出
+
+透過 API 提供 agentic OCR 與結構化擷取，並提供 Python、TypeScript、Go 和 Java SDK。可免費開始使用。
+
+[取得 API 金鑰 ](https://cloud.llamaindex.ai/?utm_source=developers\&utm_medium=docs\&utm_campaign=framework-landing\&utm_content=banner)[LlamaParse 文件](https://developers.llamaindex.ai/llamaparse/index.md)
+
+LlamaCloud 現已更名為 LlamaParse。
+
+這個託管平台過去稱為 LlamaCloud，現在已改名為 LlamaParse。相關文件請見 [developers.llamaindex.ai/llamaparse](https://developers.llamaindex.ai/llamaparse/index.md)。
+
+## 您可以打造的應用
+
+[ Agents 可呼叫工具、跨對話輪次保留狀態，並串流回報進度的助理。 ](/python/framework/use_cases/agents/)[ Workflows 透過分支、重試與人工審查進行事件驅動的協調。 ](https://developers.llamaindex.ai/python/llamaagents/workflows/)[ 問答 找出相關段落，並附上引用來回答問題（RAG）。 ](/python/framework/use_cases/q_and_a/)[ 聊天機器人 透過記憶和追問，與您的資料進行對話。 ](/python/framework/use_cases/chatbots/)[ 結構化擷取 使用 Pydantic 將文字擷取為具型別的欄位，或透過 Extract 處理整份文件。 ](/python/framework/use_cases/extraction/)[ 多模態 在檢索與生成過程中處理文字、圖片、表格和圖表。](/python/framework/use_cases/multimodal/)
+
+更多應用案例請見[使用案例頁面](/python/framework/use_cases/)，內容涵蓋文字轉 SQL、查詢 CSV、提示技巧與微調。
+
+## LlamaIndex 開源專案
+
+此框架是我們最早推出的開源專案，但並非唯一一個。後續專案規模較小、專注於文件，可搭配此框架使用，也能獨立運作。
+
+[ LiteParse 快速的開源文件解析器，可在您的電腦上執行，提供版面配置、邊界框、Markdown 與內建 OCR。無需雲端或金鑰。 ](https://developers.llamaindex.ai/liteparse/index.md)[ ExtractBench 企業文件的 schema 導向擷取基準，可用真實表單與合約比較結構化擷取效果。 ](https://extractbench.ai/)[ ParseBench 文件解析與 OCR 的開放基準測試，可用來比較適合您文件類型的解析器。 ](https://parsebench.ai/)[ LlamaIndex Framework 這套 Python 工具包提供連接器、索引、查詢引擎、agents 和 workflows。](/python/framework/getting_started/installation/)
+
+## 取得協助並參與貢獻
+
+LlamaIndex Framework 採 MIT 授權，並與社群共同打造。[貢獻指南](https://github.com/run-llama/llama_index/blob/main/CONTRIBUTING.md)涵蓋從修正文檔到新增整合套件的各種貢獻。[常見問題](/python/framework/getting_started/faq/)則回答新手最常提出的問題。
+
+[ Discord ](https://discord.gg/dGcwcsnxhU)[ GitHub 問題追蹤 ](https://github.com/run-llama/llama_index/issues)[ X ](https://twitter.com/llama_index)[ LinkedIn ](https://www.linkedin.com/company/llamaindex/)[ PyPI 上的 llama-index ](https://pypi.org/project/llama-index/)[ 整合套件](/python/framework/community/integrations/)
+
+探索更多 LlamaIndex 資源：[create-llama](https://www.npmjs.com/package/create-llama)、[全端專案](/python/framework/community/full_stack_projects/)及 [Discover LlamaIndex 影片系列](/python/framework/getting_started/discover_llamaindex/)。

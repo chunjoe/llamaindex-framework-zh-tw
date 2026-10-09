@@ -1,0 +1,58 @@
+---
+title: "高階概念"
+---
+
+這是一份關於在建置 LLM 應用程式時，您會經常遇到的高階概念的快速指南。
+
+## 大型語言模型 (LLMs)
+
+LLMs 是啟動 LlamaIndex 的基礎創新。它是一種人工智慧 (AI) 電腦系統，可以理解、生成和操作自然語言，包括根據其訓練資料或在查詢時提供給它的資料來回答問題。您可以 [了解更多關於使用 LLMs](/python/framework/understanding/using_llms/)。
+
+## 代理應用程式 (Agentic Applications)
+
+當在應用程式中使用 LLM 時，它通常用於做出決策、執行動作和/或與世界互動。這是 **agentic application** 的核心定義。
+
+雖然 agentic application 的定義很廣泛，但有幾個關鍵特徵定義了 agentic application：
+
+- **LLM 增強 (Augmentation)**：LLM 會搭配工具（即程式碼中任意可呼叫的函式）、記憶體和/或動態提示 (dynamic prompts)。
+- **提示鏈 (Prompt Chaining)**：會使用多個 LLM 呼叫，它們相互建立，一個 LLM 呼叫的輸出會作為下一個的輸入。
+- **路由 (Routing)**：LLM 用於將應用程式導向應用程式中的下一個適當步驟或狀態。
+- **並行處理 (Parallelism)**：應用程式可以同時執行多個步驟或動作。
+- **協調 (Orchestration)**：使用 LLMs 的層級結構來協調較低層級的動作和 LLMs。
+- **反思 (Reflection)**：LLM 用於反思和驗證先前步驟或 LLM 呼叫的輸出，可用於引導應用程式到下一個適當的步驟或狀態。
+
+在 LlamaIndex 中，您可以使用 `Workflow` 類別來協調一系列步驟和 LLMs，從而建置代理應用程式。您可以 [了解更多關於 workflows](https://developers.llamaindex.ai/python/llamaagents/workflows/)。
+
+## Agents
+
+我們將 agent 定義為「agentic application」的一個特定實例。agent 是一段軟體，它透過將 LLMs 與其他工具和記憶體結合，在一個推理迴圈中半自主地執行任務，該迴圈決定下一個要使用的工具（如果有）。
+
+在實際操作中，這意味著類似於：
+
+- 一個 agent 接收使用者訊息
+- agent 使用 LLM 來確定使用先前的對話歷史、工具和最新的使用者訊息所應採取的下一個適當動作
+- agent 可能呼叫一個或多個工具來協助使用者的請求
+- 如果使用了工具，agent 將解釋工具的輸出並將其用於告知下一個動作
+- 一旦 agent 停止執行動作，它就會將最終輸出返回給使用者
+
+您可以 [了解更多關於 agents](/python/framework/understanding/agent/)。
+
+## 檢索增強生成 (Retrieval Augmented Generation (RAG))
+
+檢索增強生成 (RAG) 是使用 LlamaIndex 建置有資料支持的 LLM 應用程式的核心技術。它允許 LLMs 在查詢時將資料提供給 LLM 以回答有關您私人資料的問題，而不是在您的資料上訓練 LLM。為了避免每次都將**所有**資料發送給 LLM，RAG 會對您的資料進行索引，並僅選擇性地將相關部分與您的查詢一起發送。您可以 [了解更多關於 RAG](/python/framework/understanding/rag/)。
+
+## 用例 (Use cases)
+
+有無限多的有資料支持的 LLM 應用程式的用例，但它們大致可分為五個類別：
+
+[**Agents**](/python/framework/module_guides/deploying/agents/)：一個 agent 是一個由 LLM 驅動的自動決策者，它透過一組 [工具](/python/framework/module_guides/deploying/agents/tools/) 與世界互動。Agents 可以執行任意數量的步驟來完成給定的任務，動態決定最佳的行動方案，而不是遵循預先設定的步驟。這為它提供了額外的靈活性來處理更複雜的任務。[**Workflows**](https://developers.llamaindex.ai/python/llamaagents/workflows/): LlamaIndex 中的 Workflow 是一個特定的事件驅動抽象，讓您可以協調一系列的步驟和 LLMs 呼叫。Workflows 可用於實作任何 agentic application，並且是 LlamaIndex 的核心組成部分。
+
+[**Structured Data Extraction**](/python/framework/use_cases/extraction/) Pydantic extractor 讓您可以指定要從資料中提取的精確資料結構，並使用 LLMs 以類型安全的方式填補缺失的部分。這對於從 PDF、網站等非結構化來源中提取結構化資料非常有用，是自動化 workflows 的關鍵。
+
+[**Query Engines**](/python/framework/module_guides/deploying/query_engine/): Query engine 是一個端到端的流程，讓您可以對資料提出問題。它會接收自然語言查詢，並回傳回應，以及檢索到的參考資料並傳遞給 LLM。
+
+[**聊天引擎**](/python/framework/module_guides/deploying/chat_engines/): Chat engine 是一個端到端的流程，讓您可以與您的資料進行對話（多輪來回，而非單一問答）。
+
+提示
+
+- 告訴我如何 [customize things](/python/framework/getting_started/faq/) \* 繼續學習我們的 [understanding LlamaIndex](/python/framework/understanding/) 指南 \* 準備好深入了解了嗎？查看 [元件指南](/python/framework/module_guides/)

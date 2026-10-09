@@ -1,0 +1,52 @@
+[
+  {
+    "route": "/python/framework/changelog/",
+    "from": "- multi-selector support in router query engine (#6518)\n- pydantic selector support in router query engine using OpenAI function calling API (#6518)\n- streaming response support in `CondenseQuestionChatEngine` and `SimpleChatEngine` (#6524)\n- metadata filtering support in `QdrantVectorStore` (#6476)\n- add `PGVectorStore` to support postgres with pgvector (#6190)\n",
+    "to": "- 在 router query engine 中支援 multi-selector (#6518)\n- 在 router query engine 中透過 OpenAI function calling API 支援 pydantic selector (#6518)\n- 在 `CondenseQuestionChatEngine` 與 `SimpleChatEngine` 中支援串流回應 (#6524)\n- 在 `QdrantVectorStore` 中支援 metadata 篩選 (#6476)\n- 新增 `PGVectorStore`，支援搭配 pgvector 的 postgres (#6190)\n"
+  },
+  {
+    "route": "/python/framework/changelog/",
+    "from": "- better error handling in the mbox reader (#6248)\n- Fix blank similarity score when using weaviate (#6512)\n- fix for sorted nodes in `PrevNextNodePostprocessor` (#6048)\n",
+    "to": "- 改善 mbox reader 的錯誤處理 (#6248)\n- 修正使用 weaviate 時 similarity score 為空的問題 (#6512)\n- 修正 `PrevNextNodePostprocessor` 中 nodes 的排序 (#6048)\n"
+  },
+  {
+    "route": "/python/framework/changelog/",
+    "from": "- query planning tool with OpenAI Function API (#6520)\n- docs: example of kg+vector index (#6497)\n- Set context window sizes for Cohere and AI21(J2 model) (#6485)\n",
+    "to": "- 新增使用 OpenAI Function API 的 query planning tool (#6520)\n- 文件：新增 kg+vector index 範例 (#6497)\n- 設定 Cohere 與 AI21（J2 model）的 Context window 大小 (#6485)\n"
+  },
+  {
+    "route": "/python/framework/changelog/",
+    "from": "- add default input size for Cohere and AI21 (#6485)\n- docs: replace comma with colon in dict object (#6439)\n- extra space in prompt and error message update (#6443)\n- \\[Issue 6417] Fix prompt\\_templates docs page (#6499)\n- Rip out monkey patch and update model to context window mapping (#6490)\n",
+    "to": "- 新增 Cohere 與 AI21 的預設輸入大小 (#6485)\n- 文件：將 dict 物件中的逗號改為冒號 (#6439)\n- 調整 prompt 中多餘的空格與錯誤訊息 (#6443)\n- \\[Issue 6417] 修正 prompt\\_templates 文件頁面 (#6499)\n- 移除 monkey patch，並更新 model 與 Context window 的對應關係 (#6490)\n"
+  },
+  {
+    "route": "/python/framework/changelog/",
+    "from": "- update mongo interface (#6501)\n- fixes that we forgot to include for openai pydantic program (#6503) (#6504)\n- Fix github pics in Airbyte notebook (#6493)\n",
+    "to": "- 更新 mongo 介面 (#6501)\n- 補上之前遺漏的 openai pydantic program 修正 (#6503) (#6504)\n- 修正 Airbyte notebook 中的 github 圖片 (#6493)\n"
+  },
+  {
+    "route": "/python/framework/changelog/",
+    "from": "- Add node doc\\_id filtering to weaviate (#6467)\n- New `TokenCountingCallback` to customize and track embedding, prompt, and completion token usage (#6440)\n- OpenAI Retrieval Function Agent (#6491)\n",
+    "to": "- 在 weaviate 中新增 node doc\\_id 篩選 (#6467)\n- 新增 `TokenCountingCallback`，可自訂並追蹤 embedding、prompt 與 completion 的 token 用量 (#6440)\n- OpenAI Retrieval Function Agent (#6491)\n"
+  },
+  {
+    "route": "/python/framework/changelog/",
+    "from": "- Deprecated current token tracking (llm predictor and embed model will no longer track tokens in the future, please use the `TokenCountingCallback` (#6440)\n- Add maximal marginal relevance to the Simple Vector Store, which can be enabled as a query mode (#6446)\n",
+    "to": "- 棄用目前的 token 追蹤方式（llm predictor 與 embed model 未來將不再追蹤 tokens，請改用 `TokenCountingCallback` (#6440)\n- 在 Simple Vector Store 中新增 maximal marginal relevance，可透過 query mode 啟用 (#6446)\n"
+  },
+  {
+    "route": "/python/framework/changelog/",
+    "from": "- `as_chat_engine` properly inherits the current service context (#6470)\n- Use namespace when deleting from pinecone (#6475)\n- Fix paths when using fsspec on windows (#3778)\n- Fix for using custom file readers in `SimpleDirectoryReader` (#6477)\n- Edit MMR Notebook (#6486)\n- FLARE fixes (#6484)\n",
+    "to": "- `as_chat_engine` 正確繼承目前的 service context (#6470)\n- 從 pinecone 刪除資料時使用 namespace (#6475)\n- 修正 Windows 上使用 fsspec 時的路徑 (#3778)\n- 修正 `SimpleDirectoryReader` 使用自訂 file readers 的問題 (#6477)\n- 編修 MMR Notebook (#6486)\n- FLARE 修正 (#6484)\n"
+  },
+  {
+    "route": "/python/framework/changelog/",
+    "from": "- Added better support for vector store with existing data (e.g. allow configurable text key) for Pinecone and Weaviate. (#6393)\n- Support batched upsert for Pineone (#6393)\n- Added initial [guidance](https://github.com/microsoft/guidance/) integration. Added `GuidancePydanticProgram` for generic structured output generation and `GuidanceQuestionGenerator` for generating sub-questions in `SubQuestionQueryEngine` (#6246).\n",
+    "to": "- 改善 Pinecone 與 Weaviate 對已有資料之 vector store 的支援，例如允許設定 text key。 (#6393)\n- 支援 Pineone 的批次 upsert (#6393)\n- 新增初步的 [guidance](https://github.com/microsoft/guidance/) 整合。新增 `GuidancePydanticProgram` 以產生一般結構化輸出，並新增 `GuidanceQuestionGenerator`，在 `SubQuestionQueryEngine` 中產生子問題 (#6246)。\n"
+  },
+  {
+    "route": "/python/framework/changelog/",
+    "from": "- Added `SQLJoinQueryEngine` (generalization of `SQLAutoVectorQueryEngine`) (#6265)\n- Added support for graph stores under the hood, and initial support for Nebula KG. More docs coming soon! (#2581)\n- Added guideline evaluator to allow llm to provide feedback based on user guidelines (#4664)\n- Added support for MongoDB Vector stores to enable Atlas knnbeta search (#6379)\n- Added new CitationQueryEngine for inline citations of sources in response text (#6239)\n",
+    "to": "- 新增 `SQLJoinQueryEngine`（`SQLAutoVectorQueryEngine` 的泛化版本）(#6265)\n- 新增底層 graph stores 支援，並初步支援 Nebula KG。後續將提供更多文件！ (#2581)\n- 新增 guideline evaluator，讓 llm 能依照使用者的 guidelines 提供回饋 (#4664)\n- 新增 MongoDB Vector stores 支援，以使用 Atlas knnbeta search (#6379)\n- 新增 CitationQueryEngine，在回應文字中提供來源的 inline citations (#6239)\n"
+  }
+]

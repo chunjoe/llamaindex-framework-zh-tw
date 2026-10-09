@@ -1,0 +1,37 @@
+---
+title: "結構化輸出"
+---
+
+LLMs 產生結構化輸出（structured outputs）的能力對於依賴可靠解析輸出值的下游應用程式非常重要。LlamaIndex 本身也透過以下方式依賴結構化輸出。
+
+- **Document 檢索 (retrieval)**：LlamaIndex 中的許多資料結構依賴於使用特定 Schema 呼叫 LLM 來進行 Document 檢索。例如，tree index 預期 LLM 呼叫的格式是「ANSWER: (number)」。
+- **回應合成 (Response synthesis)**：使用者可能會期望最終的回應包含一定程度的結構（例如 JSON 輸出、格式化的 SQL 查詢等）。
+
+LlamaIndex 提供多種模組，使 LLMs 能夠以結構化的格式產生輸出。預設情況下，結構化輸出在我們的 LLM classes 中提供。我們也提供較底層的模組：
+
+- **Pydantic Programs**：這些是通用模組，將輸入 prompt 映射到結構化輸出，由一個 Pydantic 物件表示。它們可以使用 function calling APIs 或 text completion APIs + output parsers。這些也可以與 query engines 整合。
+- **預定義 Pydantic Program**：我們有預定義的 Pydantic programs，將輸入映射到特定的輸出類型（如 dataframes）。
+- **Output Parsers**：這些是在 LLM text completion endpoint 之前和之後運作的模組。它們不與 LLM function calling endpoints 一起使用（因為後者預設就包含結構化輸出）。
+
+請參閱下方的章節以了解 output parsers 和 Pydantic programs 的概述。
+
+## 🔬 結構化輸出函式結構 (Anatomy of a Structured Output Function)
+
+這裡描述了由 LLM 驅動的結構化輸出函式的不同組成部分。管線取決於您是使用 **generic LLM text completion API** 還是 **LLM function calling API**。
+
+![](/assets/8137124c2d15.png)
+
+對於 generic completion APIs，輸入和輸出由 text prompts 處理。output parser 在 LLM 呼叫之前和之後扮演角色，以確保結構化輸出。在 LLM 呼叫之前，output parser 可以將格式指令附加到 prompt 上。在 LLM 呼叫之後，output parser 可以解析輸出以符合指定的指令。
+
+對於 function calling APIs，輸出本質上就是結構化的格式，輸入可以接受所需物件的 signature。結構化輸出只需轉換成正確的物件格式（例如 Pydantic）。
+
+## 啟動指南 (Starter Guides)
+
+- [Structured data extraction tutorial](/python/framework/understanding/extraction/)
+- [Examples of Structured Outputs](https://developers.llamaindex.ai/python/examples/structured_outputs/structured_outputs/index.md)
+
+## 其他資源 (Other Resources)
+
+- [Pydantic Programs](/python/framework/module_guides/querying/structured_outputs/pydantic_program/)
+- [Structured Outputs + Query Engines](/python/framework/module_guides/querying/structured_outputs/query_engine/)
+- [Output Parsers](/python/framework/module_guides/querying/structured_outputs/output_parser/)

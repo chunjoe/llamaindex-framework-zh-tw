@@ -1,0 +1,41 @@
+---
+title: "回應模式"
+---
+
+目前，我們支援以下選項：
+
+- `refine`：透過依序處理每個檢索到的文本區塊來***建立並精煉***答案。這會針對每個 Node/檢索到的區塊進行單獨的 LLM 呼叫。
+
+  **詳情：** 第一個區塊用於使用 `text_qa_template` 提示進行查詢。然後，答案、下一個區塊（以及原始問題）會用於另一個使用 `refine_template` 提示的查詢。以此類推，直到所有區塊都被解析。
+
+  如果一個區塊太大，無法在視窗內容納（考慮提示大小），則使用 `TokenTextSplitter`（允許區塊之間有部分文本重疊）進行分割，並且（新的）附加區塊被視為原始區塊集合中的區塊（因此也會使用 `refine_template` 進行查詢）。
+
+  適合需要更詳細的答案。
+
+- `compact`（預設）：類似於 `refine`，但會***壓縮***（連接）區塊，從而減少 LLM 呼叫次數。
+
+  **詳情：** 將盡可能多的文本（從檢索到的區塊中連接/打包）放入上下文視窗內（考慮 `text_qa_template` 和 `refine_template` 之間的最大提示大小）。如果文本太長無法放入一個提示中，則會根據需要分割成多個部分（使用 `TokenTextSplitter`，從而允許文本區塊之間有部分重疊）。
+
+  每個文本部分都被視為一個「chunk」，並傳送給 `refine` synthesizer。
+
+  簡而言之，它就像 `refine`，但 LLM 呼叫次數較少。
+
+- `tree_summarize`：重複查詢 LLM，使用 `summary_template` 提示，直到所有連接的區塊都被查詢，從而產生越多答案，這些答案本身會被遞迴用作 `tree_summarize` LLM 呼叫中的區塊，以此類推，直到只剩一個區塊，因此只有一個最終答案。
+
+  **詳情：** 使用 `summary_template` 提示盡可能多地將區塊連接以適應上下文視窗，如果需要則分割（再次使用 `TokenTextSplitter` 並允許部分文本重疊）。然後，對每個產生的區塊/分割進行查詢，對 `summary_template`（沒有***refine*** 查詢！）進行查詢，以獲取最多的答案。
+
+  如果只有一個答案（因為只有一個區塊），則它是最終答案。
+
+  如果有多個答案，這些答案本身被視為區塊，並遞迴傳送給 `tree_summarize` 流程（連接/分割以適應/查詢）。
+
+  適合摘要目的。
+
+- `simple_summarize`：將所有文本區塊截斷以適應單個 LLM 提示。適合快速摘要，但由於截斷可能丟失細節。
+
+- `no_text`：只運行 retriever 以獲取原本會傳送給 LLM 的 nodes，而實際上不傳送它們。然後可以透過檢查 `response.source_nodes` 來檢查。
+
+- `accumulate`：給定一組文本區塊和查詢，將查詢應用於每個文本區塊，並將回應累積到一個陣列中。返回所有回應的連接字串。適合當你需要對每個文本區塊分別運行相同的查詢時。
+
+- `compact_accumulate`：與 accumulate 相同，但會像 `compact` 一樣「壓縮」每個 LLM 提示，並對每個文本區塊運行相同的查詢。
+
+請參閱 [Response Synthesizer](/python/framework/module_guides/querying/response_synthesizers/) 以了解更多資訊。

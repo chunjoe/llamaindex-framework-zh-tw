@@ -1,0 +1,498 @@
+---
+title: "Portkey"
+---
+
+**Portkey** 是一個全端 LLMOps 平台，能可靠且安全地將您的 Gen AI 應用程式投入生產環境。
+
+#### Portkey 與 Llamaindex 的整合重點：
+
+![header](/assets/3e751468ce9a.png)
+
+1. **[🚪 AI Gateway](/python/framework/integrations/llm/portkey/#implementing-fallbacks-and-retries-with-portkey)**:
+
+   - **[Automated Fallbacks & Retries](/python/framework/integrations/llm/portkey/#implementing-fallbacks-and-retries-with-portkey)**: 確保即使主要服務失敗，您的應用程式也能保持功能。
+   - **[Load Balancing](/python/framework/integrations/llm/portkey/#implementing-load-balancing-with-portkey)**: 有效地將傳入的請求分散到多個模型之間。
+   - **[Semantic Caching](/python/framework/integrations/llm/portkey/#implementing-semantic-caching-with-portkey)**: 透過智慧地快取結果，降低成本和延遲。
+
+2. **[🔬 Observability](/python/framework/integrations/llm/portkey/#observability-with-portkey)**:
+
+   - **Logging**: 追蹤所有請求以供監控和除錯。
+   - **Requests Tracing**: 了解每個請求的歷程以進行優化。
+   - **Custom Tags**: 對請求進行分段和分類，以獲得更好的洞察。
+
+3. **[📝 Continuous Improvement with User Feedback](/python/framework/integrations/llm/portkey/#feedback-with-portkey)**:
+
+   - **Feedback Collection**: 無縫收集任何服務請求的反饋，無論是在生成層級還是對話層級。
+   - **Weighted Feedback**: 透過為使用者反饋值附加權重，獲取細微的資訊。
+   - **Feedback Metadata**: 將自訂的 metadata 納入反饋中，以提供上下文，從而實現更豐富的洞察和分析。
+
+4. **[🔑 Secure Key Management](/python/framework/integrations/llm/portkey/#feedback-with-portkey)**:
+
+   - **Virtual Keys**: Portkey 將原始提供者金鑰轉換為虛擬金鑰，確保您的主要憑證保持不變。
+   - **Multiple Identifiers**: 能夠為同一個提供者或同一個金鑰添加多個金鑰，並以不同名稱進行識別，在不影響安全性的情況下方便識別。
+
+要利用這些功能，讓我們從設定開始：
+
+[![\"Open](/assets/e79852128a5f.svg)](https://colab.research.google.com/github/run-llama/llama_index/blob/main/docs/examples/llm/portkey.ipynb)
+
+如果您在 Colab 中開啟此 Notebook，您可能需要安裝 LlamaIndex 🦙。
+
+```
+%pip install llama-index-llms-portkey
+```
+
+```
+!pip install llama-index
+```
+
+```
+# Installing Llamaindex & Portkey SDK
+!pip install -U llama_index
+!pip install -U portkey-ai
+
+
+# Importing necessary libraries and modules
+from llama_index.llms.portkey import Portkey
+from llama_index.core.llms import ChatMessage
+import portkey as pk
+```
+
+您不需要安裝 **任何** 其他 SDK 或在您的 Llamaindex 應用程式中導入它們。
+
+#### **步驟 1️⃣：取得您的 Portkey API 金鑰以及用於 OpenAI、Anthropic 等的虛擬金鑰**
+
+**[Portkey API Key](https://app.portkey.ai/)**: 登入 [Portkey here](https://app.portkey.ai/)，然後點擊左上角的個人資料圖示並選擇「Copy API Key」。
+
+```
+import os
+
+
+os.environ["PORTKEY_API_KEY"] = "PORTKEY_API_KEY"
+```
+
+**[Virtual Keys](https://docs.portkey.ai/key-features/ai-provider-keys)**
+
+1. 前往 [Portkey dashboard](https://app.portkey.ai/) 上的「Virtual Keys」頁面，點擊右上角的「Add Key」按鈕。
+2. 選擇您的 AI 提供者 (OpenAI, Anthropic, Cohere, HuggingFace 等)，為您的金鑰指定一個唯一的名稱，如果需要，請記下任何相關的使用說明。您的虛擬金鑰已準備就緒！
+
+![header](/assets/6a2bb5b2d12f.png) 3. 現在複製並貼上以下金鑰——您可以在 Portkey 生態系統的任何地方使用它們，同時保持您的原始金鑰安全且不變。
+
+```
+openai_virtual_key_a = ""
+openai_virtual_key_b = ""
+
+
+anthropic_virtual_key_a = ""
+anthropic_virtual_key_b = ""
+
+
+cohere_virtual_key_a = ""
+cohere_virtual_key_b = ""
+```
+
+如果您不想使用 Portkey 的 Virtual keys，也可以直接使用您的 AI 提供者金鑰。
+
+```
+os.environ["OPENAI_API_KEY"] = ""
+os.environ["ANTHROPIC_API_KEY"] = ""
+```
+
+#### **步驟 2️⃣：設定 Portkey 功能**
+
+要充分利用 Portkey 與 Llamaindex 的整合潛力，您可以像上面所示配置各種功能。以下是所有 Portkey 功能及預期值的指南：
+
+| Feature | Config Key | Value(Type) | Required |
+| :--- | :--- | :--- | :--- |
+| API Key | `api_key` | `string` | ✅ Required (can be set externally) |
+| Mode | `mode` | `fallback`, `loadbalance`, `single` | ✅ Required |
+| Cache Type | `cache_status` | `simple`, `semantic` | ❔ Optional || Force Cache Refresh | `cache_force_refresh` | `True`, `False` | ❔ Optional |
+| Cache Age | `cache_age` | `integer` (in seconds) | ❔ Optional |
+| Trace ID | `trace_id` | `string` | ❔ Optional |
+| Retries | `retry` | `integer` \[0,5] | ❔ Optional |
+| Metadata | `metadata` | `json object` [More info](https://docs.portkey.ai/key-features/custom-metadata) | ❔ Optional |
+| Base URL | `base_url` | `url` | ❔ Optional |
+
+- `api_key` 和 `mode` 是必需的數值。
+
+- 您可以使用 Portkey constructor 設定您的 Portkey API key，也可以將其設定為 environment variable。
+
+- 有 **3** 種模式：Single、Fallback、Loadbalance。
+
+  - **Single** - 這是標準模式。如果您不需要 Fallback 或 Loadbalance 功能，請使用此模式。
+  - **Fallback** - 如果您想啟用 Fallback 功能，請設定此模式。[請參閱此指南](/python/framework/integrations/llm/portkey/#implementing-fallbacks-and-retries-with-portkey)。
+  - **Loadbalance** - 如果您想啟用 Loadbalance 功能，請設定此模式。[請參閱此指南](/python/framework/integrations/llm/portkey/#implementing-load-balancing-with-portkey)。
+
+以下是如何設定某些功能的範例：
+
+```
+portkey_client = Portkey(
+    mode="single",
+)
+
+
+# Since we have defined the Portkey API Key with os.environ, we do not need to set api_key again here
+```
+
+#### **步驟 3️⃣：建構 LLM**
+
+使用 Portkey 整合，建構 LLM 變得更簡單。對於所有 provider，請使用 `LLMOptions` function，使用與您在 OpenAI 或 Anthropic constructor 中習慣的完全相同的 key。唯一的新 key 是 `weight`，它是 load balancing 功能的必要條件。
+
+```
+openai_llm = pk.LLMOptions(
+    provider="openai",
+    model="gpt-4",
+    virtual_key=openai_virtual_key_a,
+)
+```
+
+上述程式碼說明了如何利用 `LLMOptions` function，使用 OpenAI provider 和 GPT-4 model 設定 LLM。此功能也可以用於其他 provider，使整合過程在不同 provider 之間保持簡潔和一致。
+
+#### **步驟 4️⃣：啟用 Portkey Client**
+
+在您使用 `LLMOptions` function 建構 LLM 後，下一步是使用 Portkey 來啟用它。此步驟對於確保所有 Portkey 功能都可供您的 LLM 使用至關重要。
+
+```
+portkey_client.add_llms(openai_llm)
+```
+
+這樣就完成了！僅用 4 個步驟，您就為您的 Llamaindex app 注入了複雜的生產能力。
+
+#### **🔧 測試整合**
+
+讓我們確保一切都設定正確。以下，我們建立一個簡單的聊天場景，並透過我們的 Portkey client 傳送它以查看回應。
+
+```
+messages = [
+    ChatMessage(role="system", content="You are a helpful assistant"),
+    ChatMessage(role="user", content="What can you do?"),
+]
+print("Testing Portkey Llamaindex integration:")
+response = portkey_client.chat(messages)
+print(response)
+```
+
+您的日誌將在您的 [Portkey dashboard](https://app.portkey.ai/) 上顯示如下：
+
+![Logs](/assets/7e54ec3f913b.png)
+
+#### **⏩ 串流回應**
+
+使用 Portkey，串流回應前所未來得如此簡單。Portkey 有 4 個回應 function：
+
+1. `.complete(prompt)`
+2. `.stream_complete(prompt)`
+3. `.chat(messages)`
+4. `.stream_chat(messages)`
+
+雖然 `complete` function 預期一個字串輸入(`str`)，但 `chat` function 則使用 `ChatMessage` 物件的陣列。
+
+**範例用法：**
+
+```
+# Let's set up a prompt and then use the stream_complete function to obtain a streamed response.
+
+
+prompt = "Why is the sky blue?"
+
+
+print("\nTesting Stream Complete:\n")
+response = portkey_client.stream_complete(prompt)
+for i in response:
+    print(i.delta, end="", flush=True)
+
+
+# Let's prepare a set of chat messages and then utilize the stream_chat function to achieve a streamed chat response.
+
+
+messages = [
+    ChatMessage(role="system", content="You are a helpful assistant"),
+    ChatMessage(role="user", content="What can you do?"),
+]
+
+
+print("\nTesting Stream Chat:\n")
+response = portkey_client.stream_chat(messages)
+for i in response:
+    print(i.delta, end="", flush=True)
+```
+
+#### **🔍 總結與參考資料**
+
+恭喜！🎉 您已成功設定並測試了與 Llamaindex 的 Portkey 整合。總結步驟如下：
+
+1. pip install portkey-ai
+2. from llama\_index.llms import Portkey
+3. 取得您的 Portkey API Key 並從 [這裡](https://app.portkey.ai/) 建立您的虛擬 provider keys。
+4. 建構您的 Portkey client 並設定模式：`portkey_client=Portkey(mode="fallback")`
+5. 使用 LLMOptions：`openai_llm = pk.LLMOptions(provider="openai", model="gpt-4", virtual_key=openai_key_a)` 建構您的 provider LLM
+6. 使用 `portkey_client.add_llms(openai_llm)` 將 LLM 加入 Portkey7. 定期呼叫 Portkey 方法，如同呼叫任何其他 LLM，並使用 `portkey_client.chat(messages)`
+
+以下是所有功能及其參數的指南：
+
+- [Portkey LLM Constructor](/python/framework/integrations/llm/portkey/)
+- [LLMOptions Constructor](https://github.com/Portkey-AI/rubeus-python-sdk/blob/4cf3e17b847225123e92f8e8467b41d082186d60/rubeus/api_resources/utils.py#L179)
+- [List of Portkey + Llamaindex Features](/python/framework/integrations/llm/portkey/)
+
+[![\"Open](/assets/e79852128a5f.svg)](https://colab.research.google.com/github/run-llama/llama_index/blob/main/docs/examples/llm/portkey.ipynb)
+
+#### **🔁 使用 Portkey 實作 Fallbacks 和 Retries**
+
+Fallbacks 和 retries 對於建構具彈性的 AI 應用程式至關重要。使用 Portkey，實作這些功能非常簡單：
+
+- **Fallbacks**：如果主要的服務或模型失敗，Portkey 會自動切換到備用模型。
+- **Retries**：如果請求失敗，Portkey 可以設定為多次重試該請求。
+
+以下將展示如何使用 Portkey 設定 fallbacks 和 retries：
+
+```
+portkey_client = Portkey(mode="fallback")
+messages = [
+    ChatMessage(role="system", content="You are a helpful assistant"),
+    ChatMessage(role="user", content="What can you do?"),
+]
+
+
+llm1 = pk.LLMOptions(
+    provider="openai",
+    model="gpt-4",
+    retry_settings={"on_status_codes": [429, 500], "attempts": 2},
+    virtual_key=openai_virtual_key_a,
+)
+
+
+llm2 = pk.LLMOptions(
+    provider="openai",
+    model="gpt-3.5-turbo",
+    virtual_key=openai_virtual_key_b,
+)
+
+
+portkey_client.add_llms(llm_params=[llm1, llm2])
+
+
+print("Testing Fallback & Retry functionality:")
+response = portkey_client.chat(messages)
+print(response)
+```
+
+#### **⚖️ 使用 Portkey 實作 Load Balancing**
+
+Load balancing 確保傳入的請求能有效地分配給多個模型。這不僅能提升效能，在一個模型失敗時也能提供冗餘。
+
+使用 Portkey，實作 load balancing 非常簡單。你需要：
+
+- 為每個 LLM 定義 `weight` 參數。此權重決定了請求如何在 LLMs 之間分配。
+- 確保所有 LLMs 的權重總和等於 1。
+
+以下是使用 Portkey 設定 load balancing 的範例：
+
+```
+portkey_client = Portkey(mode="ab_test")
+
+
+messages = [
+    ChatMessage(role="system", content="You are a helpful assistant"),
+    ChatMessage(role="user", content="What can you do?"),
+]
+
+
+llm1 = pk.LLMOptions(
+    provider="openai",
+    model="gpt-4",
+    virtual_key=openai_virtual_key_a,
+    weight=0.2,
+)
+
+
+llm2 = pk.LLMOptions(
+    provider="openai",
+    model="gpt-3.5-turbo",
+    virtual_key=openai_virtual_key_a,
+    weight=0.8,
+)
+
+
+portkey_client.add_llms(llm_params=[llm1, llm2])
+
+
+print("Testing Loadbalance functionality:")
+response = portkey_client.chat(messages)
+print(response)
+```
+
+#### **🧠 使用 Portkey 實作 Semantic Caching**
+
+Semantic caching 是一種智慧的快取機制，它能理解請求的上下文。它不只依賴精確的輸入匹配來快取，而是識別相似的請求並提供快取結果，從而減少重複請求、提升回應時間並節省成本。
+
+讓我們看看如何使用 Portkey 實作 semantic caching：
+
+```
+import time
+
+
+portkey_client = Portkey(mode="single")
+
+
+openai_llm = pk.LLMOptions(
+    provider="openai",
+    model="gpt-3.5-turbo",
+    virtual_key=openai_virtual_key_a,
+    cache_status="semantic",
+)
+
+
+portkey_client.add_llms(openai_llm)
+
+
+current_messages = [
+    ChatMessage(role="system", content="You are a helpful assistant"),
+    ChatMessage(role="user", content="What are the ingredients of a pizza?"),
+]
+
+
+print("Testing Portkey Semantic Cache:")
+
+
+start = time.time()
+response = portkey_client.chat(current_messages)
+end = time.time() - start
+
+
+print(response)
+print(f"{'-'*50}\nServed in {end} seconds.\n{'-'*50}")
+
+
+new_messages = [
+    ChatMessage(role="system", content="You are a helpful assistant"),
+    ChatMessage(role="user", content="Ingredients of pizza"),
+]
+
+
+print("Testing Portkey Semantic Cache:")
+
+
+start = time.time()
+response = portkey_client.chat(new_messages)
+end = time.time() - start
+
+
+print(response)
+print(f"{'-'*50}\nServed in {end} seconds.\n{'-'*50}")
+```
+
+Portkey 的 cache 還支援另外兩個快取關鍵功能 - Force Refresh 和 Age。
+
+`cache_force_refresh`：強制向你的 provider 發送請求，而不是從快取中提供。`cache_age`：決定此特定字串的快取儲存應該在何時自動刷新。快取的อายุ設定為秒數。
+
+以下是如何使用它的方法：
+
+```
+# Setting the cache status as `semantic` and cache_age as 60s.
+openai_llm = pk.LLMOptions(
+    provider="openai",
+    model="gpt-3.5-turbo",
+    virtual_key=openai_virtual_key_a,
+    cache_force_refresh=True,
+    cache_age=60,
+)
+```
+
+#### **🔬 使用 Portkey 進行 Observability**
+
+了解應用程式行為至關重要。Portkey 的 observability 功能讓您輕鬆監控、除錯和優化您的 AI 應用程式。您可以追蹤每個請求、了解其過程，並根據自訂標籤對其進行分段。這種細節可以幫助識別瓶頸、優化成本並提升整體使用者體驗。
+
+以下是如何使用 Portkey 設定 observability：
+
+```
+metadata = {
+    "_environment": "production",
+    "_prompt": "test",
+    "_user": "user",
+    "_organisation": "acme",
+}
+
+
+trace_id = "llamaindex_portkey"
+
+
+portkey_client = Portkey(mode="single")
+
+
+openai_llm = pk.LLMOptions(
+    provider="openai",
+    model="gpt-3.5-turbo",
+    virtual_key=openai_virtual_key_a,
+    metadata=metadata,
+    trace_id=trace_id,
+)
+
+
+portkey_client.add_llms(openai_llm)
+
+
+print("Testing Observability functionality:")
+response = portkey_client.chat(messages)
+print(response)
+```
+
+#### **🌉 Open Source AI Gateway**
+
+Portkey 的 AI Gateway 在內部使用 [open source project Rubeus](https://github.com/portkey-ai/rubeus)。Rubeus 驅動了 LLMs 的互通性、load balancing、fallbacks 等功能，並充當中介，確保您的請求得到最佳處理。
+
+使用 Portkey 的一個優點是其靈活性。您可以輕鬆自訂其行為、將請求重新導向到不同的 provider，甚至完全繞過 Portkey 的日誌記錄。
+
+以下是使用 Portkey 自訂行為的範例：
+
+```
+portkey_client.base_url=None
+```
+
+#### **📝 使用 Portkey 進行 Feedback**
+
+持續改進是 AI 的基石。為了確保您的模型和應用程式能夠演進並更好地服務使用者，回饋至關重要。Portkey 的 Feedback API 提供了一種簡單的方式來收集帶有權重的使用者回饋，讓您可以隨著時間推移進行完善和改進。
+
+以下是如何使用 Portkey 的 Feedback API：
+
+閱讀更多關於 [Feedback here](https://docs.portkey.ai/key-features/feedback-api)。
+
+```
+import requests
+import json
+
+
+# Endpoint URL
+url = "https://api.portkey.ai/v1/feedback"
+
+
+# Headers
+headers = {
+    "x-portkey-api-key": os.environ.get("PORTKEY_API_KEY"),
+    "Content-Type": "application/json",
+}
+
+
+# Data
+data = {"trace_id": "llamaindex_portkey", "value": 1}
+
+
+# Making the request
+response = requests.post(url, headers=headers, data=json.dumps(data))
+
+
+# Print the response
+print(response.text)
+```
+
+所有與每個 trace id 的回饋，包括 `weight` 和 `value`，都可以在 Portkey dashboard 上查看：
+
+![Feedback](/assets/567a91e60cf1.png)
+
+#### **✅ 結論**將 Portkey 與 Llamaindex 整合，簡化了建構強健且具彈性的 AI 應用程式的流程。憑藉如 semantic caching、observability、load balancing、feedback 和 fallbacks 等功能，您可以確保最佳效能和持續改進。
+
+透過遵循本指南，您已設定並測試了 Portkey 與 Llamaindex 的整合。在您繼續建構和部署 AI 應用程式時，請記住要充分利用此整合的全部潛力！
+
+如需進一步協助或有問題，請聯繫開發人員 ➡️
+[![Twitter](/assets/f7d93a32a166.svg)](https://twitter.com/intent/follow?screen_name=portkeyai)
+
+加入我們的實踐者社群，將 LLMs 推向生產環境 ➡️
+[![Discord](/assets/d7a92caaf8ef.svg)](https://discord.gg/sDk9JaNfK8)

@@ -1,0 +1,665 @@
+{
+  "mode": "write",
+  "snapshot": {
+    "sourceRoutes": 448,
+    "generatedPages": 448,
+    "parsedPageErrors": 0,
+    "missingGeneratedRoutes": 0,
+    "extraGeneratedRoutes": 0,
+    "staleSourceHashes": 0,
+    "dropStaleAnchors": true
+  },
+  "planned": {
+    "pagesToUpdate": 46,
+    "linkDestinationsToUpdate": 118,
+    "byKind": {
+      "vector-store-guide-alias": 4,
+      "upstream-out-of-scope": 43,
+      "local": 52,
+      "workflow-path-correction": 11,
+      "local-route-canonicalized": 8
+    },
+    "examples": [
+      {
+        "route": "/python/framework/changes/deprecated_terms/",
+        "line": 12,
+        "from": "/python/framework/module_guides/indexing/vector_store_guide/",
+        "to": "/python/framework/module_guides/indexing/vector_store_index/",
+        "kind": "vector-store-guide-alias"
+      },
+      {
+        "route": "/python/framework/changes/deprecated_terms/",
+        "line": 20,
+        "from": "/python/framework/module_guides/indexing/vector_store_guide/",
+        "to": "/python/framework/module_guides/indexing/vector_store_index/",
+        "kind": "vector-store-guide-alias"
+      },
+      {
+        "route": "/python/framework/changes/deprecated_terms/",
+        "line": 55,
+        "from": "/python/framework/module_guides/workflow/",
+        "to": "https://developers.llamaindex.ai/python/framework/module_guides/workflow/",
+        "kind": "upstream-out-of-scope"
+      },
+      {
+        "route": "/python/framework/changes/deprecated_terms/",
+        "line": 77,
+        "from": "/python/framework/module_guides/workflow/",
+        "to": "https://developers.llamaindex.ai/python/framework/module_guides/workflow/",
+        "kind": "upstream-out-of-scope"
+      },
+      {
+        "route": "/python/framework/community/faq/chat_engines/",
+        "line": 16,
+        "from": "/python/framework/module_guides/deploying/chat_engines/usage_pattern/#available-chat-modes/index.md",
+        "to": "/python/framework/module_guides/deploying/chat_engines/usage_pattern/#available-chat-modes",
+        "kind": "local"
+      },
+      {
+        "route": "/python/framework/community/faq/documents_and_nodes/",
+        "line": 3,
+        "from": "/python/framework/community/faq/documents_and_nodes/#1-what-is-the-default-chunk_size-of-a-node-object",
+        "to": "/python/framework/community/faq/documents_and_nodes/#1-what-is-the-default-chunksize-of-a-node-object",
+        "kind": "local"
+      },
+      {
+        "route": "/python/framework/community/faq/documents_and_nodes/",
+        "line": 11,
+        "from": "/python/framework/module_guides/loading/node_parsers/#customization/index.md",
+        "to": "/python/framework/module_guides/loading/node_parsers/",
+        "kind": "local"
+      },
+      {
+        "route": "/python/framework/community/faq/documents_and_nodes/",
+        "line": 17,
+        "from": "/python/framework/module_guides/loading/documents_and_nodes/usage_documents/#customizing-documents/index.md",
+        "to": "/python/framework/module_guides/loading/documents_and_nodes/usage_documents/#customizing-documents",
+        "kind": "local"
+      },
+      {
+        "route": "/python/framework/community/faq/llms/",
+        "line": 14,
+        "from": "/python/framework/module_guides/models/llms/usage_custom/#example-using-a-custom-llm-model---advanced/index.md",
+        "to": "/python/framework/module_guides/models/llms/usage_custom/#example-using-a-custom-llm-model-advanced",
+        "kind": "local"
+      },
+      {
+        "route": "/python/framework/community/faq/vector_database/",
+        "line": 16,
+        "from": "/python/framework/module_guides/storing/vector_stores/#vector-store-options--feature-support/index.md",
+        "to": "/python/framework/module_guides/storing/vector_stores/#vector-store-options-feature-support",
+        "kind": "local"
+      },
+      {
+        "route": "/python/framework/getting_started/concepts/",
+        "line": 20,
+        "from": "https://developers.llamaindex.ai/python/llamaagents/workflows/index.md",
+        "to": "https://developers.llamaindex.ai/python/llamaagents/workflows/",
+        "kind": "workflow-path-correction"
+      },
+      {
+        "route": "/python/framework/getting_started/concepts/",
+        "line": 44,
+        "from": "/python/framework/llamaagents/workflows/",
+        "to": "https://developers.llamaindex.ai/python/llamaagents/workflows/",
+        "kind": "workflow-path-correction"
+      },
+      {
+        "route": "/python/framework/",
+        "line": 12,
+        "from": "https://developers.llamaindex.ai/python/llamaagents/workflows/index.md",
+        "to": "https://developers.llamaindex.ai/python/llamaagents/workflows/",
+        "kind": "workflow-path-correction"
+      },
+      {
+        "route": "/python/framework/",
+        "line": 16,
+        "from": "https://developers.llamaindex.ai/python/llamaagents/workflows/index.md",
+        "to": "https://developers.llamaindex.ai/python/llamaagents/workflows/",
+        "kind": "workflow-path-correction"
+      },
+      {
+        "route": "/python/framework/",
+        "line": 69,
+        "from": "https://developers.llamaindex.ai/python/llamaagents/workflows/index.md",
+        "to": "https://developers.llamaindex.ai/python/llamaagents/workflows/",
+        "kind": "workflow-path-correction"
+      },
+      {
+        "route": "/python/framework/integrations/llm/nvidia/",
+        "line": 310,
+        "from": "/python/framework/integrations/llm/agent/nvidia_agent.ipynb/",
+        "to": "https://developers.llamaindex.ai/python/framework/integrations/llm/agent/nvidia_agent.ipynb/",
+        "kind": "upstream-out-of-scope"
+      },
+      {
+        "route": "/python/framework/integrations/llm/opus_4_1/",
+        "line": 174,
+        "from": "/python/framework/integrations/llm/opus_4_1/anthropic.ipynb/",
+        "to": "https://developers.llamaindex.ai/python/framework/integrations/llm/opus_4_1/anthropic.ipynb/",
+        "kind": "upstream-out-of-scope"
+      },
+      {
+        "route": "/python/framework/integrations/llm/portkey/",
+        "line": 7,
+        "from": "/python/framework/integrations/llm/portkey/#%F0%9F%94%81-implementing-fallbacks-and-retries-with-portkey",
+        "to": "/python/framework/integrations/llm/portkey/#implementing-fallbacks-and-retries-with-portkey",
+        "kind": "local"
+      },
+      {
+        "route": "/python/framework/integrations/llm/portkey/",
+        "line": 9,
+        "from": "/python/framework/integrations/llm/portkey/#%F0%9F%94%81-implementing-fallbacks-and-retries-with-portkey",
+        "to": "/python/framework/integrations/llm/portkey/#implementing-fallbacks-and-retries-with-portkey",
+        "kind": "local"
+      },
+      {
+        "route": "/python/framework/integrations/llm/portkey/",
+        "line": 10,
+        "from": "/python/framework/integrations/llm/portkey/#%E2%9A%96%EF%B8%8F-implementing-load-balancing-with-portkey",
+        "to": "/python/framework/integrations/llm/portkey/#implementing-load-balancing-with-portkey",
+        "kind": "local"
+      },
+      {
+        "route": "/python/framework/integrations/llm/portkey/",
+        "line": 11,
+        "from": "/python/framework/integrations/llm/portkey/#%F0%9F%A7%A0-implementing-semantic-caching-with-portkey",
+        "to": "/python/framework/integrations/llm/portkey/#implementing-semantic-caching-with-portkey",
+        "kind": "local"
+      },
+      {
+        "route": "/python/framework/integrations/llm/portkey/",
+        "line": 13,
+        "from": "/python/framework/integrations/llm/portkey/#%F0%9F%94%AC-observability-with-portkey",
+        "to": "/python/framework/integrations/llm/portkey/#observability-with-portkey",
+        "kind": "local"
+      },
+      {
+        "route": "/python/framework/integrations/llm/portkey/",
+        "line": 19,
+        "from": "/python/framework/integrations/llm/portkey/#%F0%9F%93%9D-feedback-with-portkey",
+        "to": "/python/framework/integrations/llm/portkey/#feedback-with-portkey",
+        "kind": "local"
+      },
+      {
+        "route": "/python/framework/integrations/llm/portkey/",
+        "line": 228,
+        "from": "/python/framework/integrations/llm/portkey/#step-2-add-all-the-portkey-features-you-want-as-illustrated-below-by-calling-the-portkey-class",
+        "to": "/python/framework/integrations/llm/portkey/",
+        "kind": "local"
+      },
+      {
+        "route": "/python/framework/integrations/llm/portkey/",
+        "line": 230,
+        "from": "/python/framework/integrations/llm/portkey/#portkeys-integration-with-llamaindex-adds-the-following-production-capabilities-to-your-apps-out-of-the-box",
+        "to": "/python/framework/integrations/llm/portkey/",
+        "kind": "local"
+      },
+      {
+        "route": "/python/framework/integrations/llm/vllm/",
+        "line": 87,
+        "from": "/python/framework/integrations/llm/vllm/localai.ipynb/#llamaindex-interaction",
+        "to": "https://developers.llamaindex.ai/python/framework/integrations/llm/vllm/localai.ipynb/#llamaindex-interaction",
+        "kind": "upstream-out-of-scope"
+      },
+      {
+        "route": "/python/framework/integrations/vector_stores/gel/",
+        "line": 68,
+        "from": "/python/framework/integrations/vector_stores/gel/cloud.geldata.com/",
+        "to": "https://developers.llamaindex.ai/python/framework/integrations/vector_stores/gel/cloud.geldata.com/",
+        "kind": "upstream-out-of-scope"
+      },
+      {
+        "route": "/python/framework/integrations/vector_stores/redisindexdemo/",
+        "line": 247,
+        "from": "/python/framework/integrations/vector_stores/redisindexdemo/cohereai.com/",
+        "to": "https://developers.llamaindex.ai/python/framework/integrations/vector_stores/redisindexdemo/cohereai.com/",
+        "kind": "upstream-out-of-scope"
+      },
+      {
+        "route": "/python/framework/integrations/vector_stores/vertexaivectorsearchv2demo/",
+        "line": 14,
+        "from": "/python/framework/integrations/vector_stores/vertexaivectorsearchv2demo/VertexAIVectorSearchDemo.ipynb/",
+        "to": "https://developers.llamaindex.ai/python/framework/integrations/vector_stores/vertexaivectorsearchv2demo/VertexAIVectorSearchDemo.ipynb/",
+        "kind": "upstream-out-of-scope"
+      },
+      {
+        "route": "/python/framework/integrations/vector_stores/vespaindexdemo/",
+        "line": 211,
+        "from": "/python/framework/integrations/vector_stores/vespaindexdemo/docs.vespa.ai/",
+        "to": "https://developers.llamaindex.ai/python/framework/integrations/vector_stores/vespaindexdemo/docs.vespa.ai/",
+        "kind": "upstream-out-of-scope"
+      },
+      {
+        "route": "/python/framework/llama_cloud/",
+        "line": 10,
+        "from": "/python/framework/#when-the-documents-get-hard/index.md",
+        "to": "/python/framework/#when-the-documents-get-hard",
+        "kind": "local"
+      },
+      {
+        "route": "/python/framework/module_guides/deploying/agents/modules/",
+        "line": 32,
+        "from": "/python/framework/understanding/using_llms/#tool-calling/index.md",
+        "to": "/python/framework/understanding/using_llms/#tool-calling",
+        "kind": "local"
+      },
+      {
+        "route": "/python/framework/module_guides/indexing/index_guide/",
+        "line": 26,
+        "from": "/python/framework/community/integrations/vector_stores/#using-a-vector-store-as-an-index/index.md",
+        "to": "/python/framework/community/integrations/vector_stores/#using-a-vector-store-as-an-index",
+        "kind": "local"
+      },
+      {
+        "route": "/python/framework/module_guides/indexing/vector_store_index/",
+        "line": 30,
+        "from": "/python/framework/module_guides/indexing/vector_store_index/#using-vector-stores",
+        "to": "/python/framework/module_guides/indexing/vector_store_index/",
+        "kind": "local"
+      },
+      {
+        "route": "/python/framework/module_guides/indexing/vector_store_index/",
+        "line": 125,
+        "from": "/python/framework/module_guides/indexing/vector_store_guide/",
+        "to": "/python/framework/module_guides/indexing/vector_store_index/",
+        "kind": "vector-store-guide-alias"
+      },
+      {
+        "route": "/python/framework/module_guides/loading/ingestion_pipeline/transformations/",
+        "line": 5,
+        "from": "/python/framework/module_guides/loading/node_parsers/modules/#text-splitters/index.md",
+        "to": "/python/framework/module_guides/loading/node_parsers/modules/#text-splitters",
+        "kind": "local"
+      },
+      {
+        "route": "/python/framework/module_guides/loading/ingestion_pipeline/transformations/",
+        "line": 8,
+        "from": "/python/framework/module_guides/models/embeddings/#list-of-supported-embeddings/index.md",
+        "to": "/python/framework/module_guides/models/embeddings/#list-of-supported-embeddings",
+        "kind": "local"
+      },
+      {
+        "route": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+        "line": 7,
+        "from": "/python/framework/module_guides/general/regions/",
+        "to": "https://developers.llamaindex.ai/python/framework/module_guides/general/regions/",
+        "kind": "upstream-out-of-scope"
+      },
+      {
+        "route": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+        "line": 24,
+        "from": "/python/framework/module_guides/general/api_key/",
+        "to": "https://developers.llamaindex.ai/python/framework/module_guides/general/api_key/",
+        "kind": "upstream-out-of-scope"
+      },
+      {
+        "route": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+        "line": 32,
+        "from": "/python/framework/module_guides/mcp/llamacloud_mcp/#tab-panel-701",
+        "to": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+        "kind": "local"
+      }
+    ]
+  },
+  "unresolvedOutputAnchors": [],
+  "droppedOutputAnchors": [
+    {
+      "from": "/python/framework/community/faq/documents_and_nodes/",
+      "line": 11,
+      "href": "/python/framework/module_guides/loading/node_parsers/#customization/index.md",
+      "target": "/python/framework/module_guides/loading/node_parsers/",
+      "fragment": "#customization/index.md",
+      "afterSafeNormalization": "customization",
+      "reason": "source anchor unavailable"
+    },
+    {
+      "from": "/python/framework/integrations/llm/portkey/",
+      "line": 228,
+      "href": "/python/framework/integrations/llm/portkey/#step-2-add-all-the-portkey-features-you-want-as-illustrated-below-by-calling-the-portkey-class",
+      "target": "/python/framework/integrations/llm/portkey/",
+      "fragment": "#step-2-add-all-the-portkey-features-you-want-as-illustrated-below-by-calling-the-portkey-class",
+      "afterSafeNormalization": "step-2-add-all-the-portkey-features-you-want-as-illustrated-below-by-calling-the-portkey-class",
+      "reason": "source anchor unavailable"
+    },
+    {
+      "from": "/python/framework/integrations/llm/portkey/",
+      "line": 230,
+      "href": "/python/framework/integrations/llm/portkey/#portkeys-integration-with-llamaindex-adds-the-following-production-capabilities-to-your-apps-out-of-the-box",
+      "target": "/python/framework/integrations/llm/portkey/",
+      "fragment": "#portkeys-integration-with-llamaindex-adds-the-following-production-capabilities-to-your-apps-out-of-the-box",
+      "afterSafeNormalization": "portkeys-integration-with-llamaindex-adds-the-following-production-capabilities-to-your-apps-out-of-the-box",
+      "reason": "source anchor unavailable"
+    },
+    {
+      "from": "/python/framework/module_guides/indexing/vector_store_index/",
+      "line": 30,
+      "href": "/python/framework/module_guides/indexing/vector_store_index/#using-vector-stores",
+      "target": "/python/framework/module_guides/indexing/vector_store_index/",
+      "fragment": "#using-vector-stores",
+      "afterSafeNormalization": "using-vector-stores",
+      "reason": "source anchor unavailable"
+    },
+    {
+      "from": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+      "line": 32,
+      "href": "/python/framework/module_guides/mcp/llamacloud_mcp/#tab-panel-701",
+      "target": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+      "fragment": "#tab-panel-701",
+      "afterSafeNormalization": "tab-panel-701",
+      "reason": "source anchor unavailable"
+    },
+    {
+      "from": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+      "line": 33,
+      "href": "/python/framework/module_guides/mcp/llamacloud_mcp/#tab-panel-702",
+      "target": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+      "fragment": "#tab-panel-702",
+      "afterSafeNormalization": "tab-panel-702",
+      "reason": "source anchor unavailable"
+    },
+    {
+      "from": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+      "line": 34,
+      "href": "/python/framework/module_guides/mcp/llamacloud_mcp/#tab-panel-703",
+      "target": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+      "fragment": "#tab-panel-703",
+      "afterSafeNormalization": "tab-panel-703",
+      "reason": "source anchor unavailable"
+    },
+    {
+      "from": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+      "line": 35,
+      "href": "/python/framework/module_guides/mcp/llamacloud_mcp/#tab-panel-704",
+      "target": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+      "fragment": "#tab-panel-704",
+      "afterSafeNormalization": "tab-panel-704",
+      "reason": "source anchor unavailable"
+    },
+    {
+      "from": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+      "line": 36,
+      "href": "/python/framework/module_guides/mcp/llamacloud_mcp/#tab-panel-705",
+      "target": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+      "fragment": "#tab-panel-705",
+      "afterSafeNormalization": "tab-panel-705",
+      "reason": "source anchor unavailable"
+    },
+    {
+      "from": "/python/framework/optimizing/custom_modules/",
+      "line": 11,
+      "href": "/python/framework/module_guides/models/llms/usage_custom/#customizing-llms-within-llamaindex-abstractions/index.md",
+      "target": "/python/framework/module_guides/models/llms/usage_custom/",
+      "fragment": "#customizing-llms-within-llamaindex-abstractions/index.md",
+      "afterSafeNormalization": "customizing-llms-within-llamaindex-abstractions",
+      "reason": "source anchor unavailable"
+    },
+    {
+      "from": "/python/framework/understanding/rag/storing/",
+      "line": 37,
+      "href": "/python/framework/module_guides/indexing/#what-is-an-embedding/index.md",
+      "target": "/python/framework/module_guides/indexing/",
+      "fragment": "#what-is-an-embedding/index.md",
+      "afterSafeNormalization": "what-is-an-embedding",
+      "reason": "source anchor unavailable"
+    }
+  ],
+  "unresolvedSourceAnchors": [],
+  "droppedSourceAnchors": [
+    {
+      "from": "/python/framework/community/faq/documents_and_nodes/",
+      "sourceFile": "source/en/community/faq/documents_and_nodes.md",
+      "line": 11,
+      "href": "/python/framework/module_guides/loading/node_parsers#customization/index.md",
+      "target": "/python/framework/module_guides/loading/node_parsers/",
+      "fragment": "#customization/index.md",
+      "afterSafeNormalization": "customization",
+      "reason": "source anchor unavailable"
+    },
+    {
+      "from": "/python/framework/integrations/llm/portkey/",
+      "sourceFile": "source/en/integrations/llm/portkey.md",
+      "line": 230,
+      "href": "#step-2-add-all-the-portkey-features-you-want-as-illustrated-below-by-calling-the-portkey-class",
+      "target": "/python/framework/integrations/llm/portkey/",
+      "fragment": "#step-2-add-all-the-portkey-features-you-want-as-illustrated-below-by-calling-the-portkey-class",
+      "afterSafeNormalization": "step-2-add-all-the-portkey-features-you-want-as-illustrated-below-by-calling-the-portkey-class",
+      "reason": "source anchor unavailable"
+    },
+    {
+      "from": "/python/framework/integrations/llm/portkey/",
+      "sourceFile": "source/en/integrations/llm/portkey.md",
+      "line": 232,
+      "href": "#portkeys-integration-with-llamaindex-adds-the-following-production-capabilities-to-your-apps-out-of-the-box",
+      "target": "/python/framework/integrations/llm/portkey/",
+      "fragment": "#portkeys-integration-with-llamaindex-adds-the-following-production-capabilities-to-your-apps-out-of-the-box",
+      "afterSafeNormalization": "portkeys-integration-with-llamaindex-adds-the-following-production-capabilities-to-your-apps-out-of-the-box",
+      "reason": "source anchor unavailable"
+    },
+    {
+      "from": "/python/framework/module_guides/indexing/vector_store_index/",
+      "sourceFile": "source/en/module_guides/indexing/vector_store_index.md",
+      "line": 30,
+      "href": "#using-vector-stores",
+      "target": "/python/framework/module_guides/indexing/vector_store_index/",
+      "fragment": "#using-vector-stores",
+      "afterSafeNormalization": "using-vector-stores",
+      "reason": "source anchor unavailable"
+    },
+    {
+      "from": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+      "sourceFile": "source/en/module_guides/mcp/llamacloud_mcp.md",
+      "line": 32,
+      "href": "#tab-panel-701",
+      "target": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+      "fragment": "#tab-panel-701",
+      "afterSafeNormalization": "tab-panel-701",
+      "reason": "source anchor unavailable"
+    },
+    {
+      "from": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+      "sourceFile": "source/en/module_guides/mcp/llamacloud_mcp.md",
+      "line": 33,
+      "href": "#tab-panel-702",
+      "target": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+      "fragment": "#tab-panel-702",
+      "afterSafeNormalization": "tab-panel-702",
+      "reason": "source anchor unavailable"
+    },
+    {
+      "from": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+      "sourceFile": "source/en/module_guides/mcp/llamacloud_mcp.md",
+      "line": 34,
+      "href": "#tab-panel-703",
+      "target": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+      "fragment": "#tab-panel-703",
+      "afterSafeNormalization": "tab-panel-703",
+      "reason": "source anchor unavailable"
+    },
+    {
+      "from": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+      "sourceFile": "source/en/module_guides/mcp/llamacloud_mcp.md",
+      "line": 35,
+      "href": "#tab-panel-704",
+      "target": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+      "fragment": "#tab-panel-704",
+      "afterSafeNormalization": "tab-panel-704",
+      "reason": "source anchor unavailable"
+    },
+    {
+      "from": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+      "sourceFile": "source/en/module_guides/mcp/llamacloud_mcp.md",
+      "line": 36,
+      "href": "#tab-panel-705",
+      "target": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+      "fragment": "#tab-panel-705",
+      "afterSafeNormalization": "tab-panel-705",
+      "reason": "source anchor unavailable"
+    },
+    {
+      "from": "/python/framework/optimizing/custom_modules/",
+      "sourceFile": "source/en/optimizing/custom_modules.md",
+      "line": 11,
+      "href": "/python/framework/module_guides/models/llms/usage_custom#customizing-llms-within-llamaindex-abstractions/index.md",
+      "target": "/python/framework/module_guides/models/llms/usage_custom/",
+      "fragment": "#customizing-llms-within-llamaindex-abstractions/index.md",
+      "afterSafeNormalization": "customizing-llms-within-llamaindex-abstractions",
+      "reason": "source anchor unavailable"
+    },
+    {
+      "from": "/python/framework/understanding/rag/storing/",
+      "sourceFile": "source/en/understanding/rag/storing.md",
+      "line": 37,
+      "href": "/python/framework/module_guides/indexing#what-is-an-embedding/index.md",
+      "target": "/python/framework/module_guides/indexing/",
+      "fragment": "#what-is-an-embedding/index.md",
+      "afterSafeNormalization": "what-is-an-embedding",
+      "reason": "source anchor unavailable"
+    }
+  ],
+  "frameworkLinksOutsideSourceScope": {
+    "count": 27,
+    "examples": [
+      {
+        "from": "/python/framework/changes/deprecated_terms/",
+        "href": "/python/framework/module_guides/workflow/",
+        "resolved": "https://developers.llamaindex.ai/python/framework/module_guides/workflow/"
+      },
+      {
+        "from": "/python/framework/changes/deprecated_terms/",
+        "href": "/python/framework/module_guides/workflow/",
+        "resolved": "https://developers.llamaindex.ai/python/framework/module_guides/workflow/"
+      },
+      {
+        "from": "/python/framework/integrations/llm/nvidia/",
+        "href": "/python/framework/integrations/llm/agent/nvidia_agent.ipynb/",
+        "resolved": "https://developers.llamaindex.ai/python/framework/integrations/llm/agent/nvidia_agent.ipynb/"
+      },
+      {
+        "from": "/python/framework/integrations/llm/opus_4_1/",
+        "href": "/python/framework/integrations/llm/opus_4_1/anthropic.ipynb/",
+        "resolved": "https://developers.llamaindex.ai/python/framework/integrations/llm/opus_4_1/anthropic.ipynb/"
+      },
+      {
+        "from": "/python/framework/integrations/llm/vllm/",
+        "href": "/python/framework/integrations/llm/vllm/localai.ipynb/#llamaindex-interaction",
+        "resolved": "https://developers.llamaindex.ai/python/framework/integrations/llm/vllm/localai.ipynb/#llamaindex-interaction"
+      },
+      {
+        "from": "/python/framework/integrations/vector_stores/gel/",
+        "href": "/python/framework/integrations/vector_stores/gel/cloud.geldata.com/",
+        "resolved": "https://developers.llamaindex.ai/python/framework/integrations/vector_stores/gel/cloud.geldata.com/"
+      },
+      {
+        "from": "/python/framework/integrations/vector_stores/redisindexdemo/",
+        "href": "/python/framework/integrations/vector_stores/redisindexdemo/cohereai.com/",
+        "resolved": "https://developers.llamaindex.ai/python/framework/integrations/vector_stores/redisindexdemo/cohereai.com/"
+      },
+      {
+        "from": "/python/framework/integrations/vector_stores/vertexaivectorsearchv2demo/",
+        "href": "/python/framework/integrations/vector_stores/vertexaivectorsearchv2demo/VertexAIVectorSearchDemo.ipynb/",
+        "resolved": "https://developers.llamaindex.ai/python/framework/integrations/vector_stores/vertexaivectorsearchv2demo/VertexAIVectorSearchDemo.ipynb/"
+      },
+      {
+        "from": "/python/framework/integrations/vector_stores/vespaindexdemo/",
+        "href": "/python/framework/integrations/vector_stores/vespaindexdemo/docs.vespa.ai/",
+        "resolved": "https://developers.llamaindex.ai/python/framework/integrations/vector_stores/vespaindexdemo/docs.vespa.ai/"
+      },
+      {
+        "from": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+        "href": "/python/framework/module_guides/general/regions/",
+        "resolved": "https://developers.llamaindex.ai/python/framework/module_guides/general/regions/"
+      },
+      {
+        "from": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+        "href": "/python/framework/module_guides/general/api_key/",
+        "resolved": "https://developers.llamaindex.ai/python/framework/module_guides/general/api_key/"
+      },
+      {
+        "from": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+        "href": "/python/framework/module_guides/parse/getting_started/",
+        "resolved": "https://developers.llamaindex.ai/python/framework/module_guides/parse/getting_started/"
+      },
+      {
+        "from": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+        "href": "/python/framework/module_guides/classify/",
+        "resolved": "https://developers.llamaindex.ai/python/framework/module_guides/classify/"
+      },
+      {
+        "from": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+        "href": "/python/framework/module_guides/split/getting_started/",
+        "resolved": "https://developers.llamaindex.ai/python/framework/module_guides/split/getting_started/"
+      },
+      {
+        "from": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+        "href": "/python/framework/module_guides/extract/",
+        "resolved": "https://developers.llamaindex.ai/python/framework/module_guides/extract/"
+      },
+      {
+        "from": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+        "href": "/python/framework/module_guides/cloud-index-v2/getting_started/",
+        "resolved": "https://developers.llamaindex.ai/python/framework/module_guides/cloud-index-v2/getting_started/"
+      },
+      {
+        "from": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+        "href": "/python/framework/module_guides/mcp/skills/",
+        "resolved": "https://developers.llamaindex.ai/python/framework/module_guides/mcp/skills/"
+      },
+      {
+        "from": "/python/framework/module_guides/mcp/llamacloud_mcp/",
+        "href": "/python/framework/module_guides/mcp/integrations/n8n/",
+        "resolved": "https://developers.llamaindex.ai/python/framework/module_guides/mcp/integrations/n8n/"
+      },
+      {
+        "from": "/python/framework/module_guides/querying/retriever/",
+        "href": "/python/framework/api_reference/retrievers/summary/",
+        "resolved": "https://developers.llamaindex.ai/python/framework/api_reference/retrievers/summary/"
+      },
+      {
+        "from": "/python/framework/module_guides/querying/",
+        "href": "/python/framework/module_guides/workflow/",
+        "resolved": "https://developers.llamaindex.ai/python/framework/module_guides/workflow/"
+      },
+      {
+        "from": "/python/framework/module_guides/",
+        "href": "/python/framework/module_guides/workflow/",
+        "resolved": "https://developers.llamaindex.ai/python/framework/module_guides/workflow/"
+      },
+      {
+        "from": "/python/framework/understanding/rag/querying/",
+        "href": "/python/framework/api_reference/index.md",
+        "resolved": "https://developers.llamaindex.ai/python/framework/api_reference/"
+      },
+      {
+        "from": "/python/framework/understanding/rag/querying/",
+        "href": "/python/framework/api_reference/postprocessor/index.md",
+        "resolved": "https://developers.llamaindex.ai/python/framework/api_reference/postprocessor/"
+      },
+      {
+        "from": "/python/framework/understanding/rag/querying/",
+        "href": "/python/framework/module_guides/workflow/index.md",
+        "resolved": "https://developers.llamaindex.ai/python/framework/module_guides/workflow/"
+      },
+      {
+        "from": "/python/framework/use_cases/agents/",
+        "href": "/python/framework/module_guides/workflow/",
+        "resolved": "https://developers.llamaindex.ai/python/framework/module_guides/workflow/"
+      },
+      {
+        "from": "/python/framework/use_cases/q_and_a/",
+        "href": "/python/framework/module_guides/workflow/",
+        "resolved": "https://developers.llamaindex.ai/python/framework/module_guides/workflow/"
+      },
+      {
+        "from": "/python/framework/use_cases/q_and_a/",
+        "href": "/python/framework/module_guides/workflow/",
+        "resolved": "https://developers.llamaindex.ai/python/framework/module_guides/workflow/"
+      }
+    ]
+  },
+  "missingGeneratedRouteExamples": [],
+  "extraGeneratedRouteExamples": [],
+  "staleSourceHashRouteExamples": [],
+  "parseErrors": [],
+  "catalogRebuiltPages": 448
+}
