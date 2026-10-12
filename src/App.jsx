@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import rehypeHighlight from 'rehype-highlight';
+import { visit } from 'unist-util-visit';
 import { contentPath, sitePath, rehypeSitePaths } from './site-path';
 import {
   Check,
@@ -23,6 +24,73 @@ import {
   X,
 } from 'lucide-react';
 import 'highlight.js/styles/github-dark.css';
+
+const MAX_AUTO_DETECT_CHARACTERS = 12000;
+const AUTO_DETECT_LANGUAGES = [
+  'python', 'bash', 'javascript', 'typescript', 'json', 'yaml', 'sql',
+  'java', 'cpp', 'go', 'rust', 'xml',
+];
+const PLAIN_TEXT_LANGUAGES = new Set(['text', 'txt', 'plain', 'plaintext', 'output', 'console']);
+const LOG_OR_OUTPUT = /^\s*(?:Traceback \(most recent call last\):|File ".+", line \d+|(?:\d{4}-\d\d-\d\d[T ].*)?\b(?:DEBUG|INFO|WARN(?:ING)?|ERROR|CRITICAL)\s*[:|]|\[(?:DEBUG|INFO|WARN(?:ING)?|ERROR|CRITICAL)\]|[├└│])/im;
+
+function readCodeText(node, limit) {
+  const text = [];
+  const stack = [...(node.children || [])].reverse();
+  let length = 0;
+  let visitedNodes = 0;
+
+  while (stack.length && length <= limit && visitedNodes < 4096) {
+    const current = stack.pop();
+    visitedNodes += 1;
+    if (current.type === 'text') {
+      const value = current.value || '';
+      const remaining = limit + 1 - length;
+      text.push(value.slice(0, remaining));
+      length += Math.min(value.length, remaining);
+    } else if (current.children) {
+      for (let index = current.children.length - 1; index >= 0; index -= 1) {
+        stack.push(current.children[index]);
+      }
+    }
+  }
+
+  return { value: text.join(''), truncated: length > limit || stack.length > 0 };
+}
+
+function rehypeBoundedHighlight() {
+  const highlight = rehypeHighlight({
+    detect: true,
+    subset: AUTO_DETECT_LANGUAGES,
+    plainText: [...PLAIN_TEXT_LANGUAGES],
+  });
+
+  return (tree, file) => {
+    visit(tree, 'element', (node, _index, parent) => {
+      if (node.tagName !== 'code' || parent?.tagName !== 'pre') return;
+
+      const properties = node.properties || (node.properties = {});
+      const classes = Array.isArray(properties.className)
+        ? properties.className.map(String)
+        : String(properties.className || '').split(/\s+/).filter(Boolean);
+      const hasLanguage = classes.some((name) => /^(?:language-|lang-)/.test(name));
+      if (classes.some((name) => ['no-highlight', 'nohighlight'].includes(name))) return;
+
+      if (hasLanguage) return;
+
+      const { value, truncated } = readCodeText(node, MAX_AUTO_DETECT_CHARACTERS);
+      const makePlainText = () => {
+        if (!classes.includes('no-highlight')) classes.push('no-highlight');
+        properties.className = classes;
+      };
+
+      if (truncated || LOG_OR_OUTPUT.test(value)) {
+        makePlainText();
+      }
+    });
+
+    highlight(tree, file);
+  };
+}
 
 const DOCS_ROOT = '/python/framework/';
 const SOURCE_ROOT = 'https://developers.llamaindex.ai';
@@ -294,7 +362,7 @@ function MarkdownBody({ page, onCopyCode, knownRoutes }) {
       {!page.markdown.trim() && <p>這篇來源文件目前沒有正文。</p>}
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw, rehypeSitePaths, rehypeHighlight]}
+        rehypePlugins={[rehypeRaw, rehypeSitePaths, rehypeBoundedHighlight]}
         components={{
         a: ({ href, children, ...props }) => {
           const target = normalizeLink(href, page, knownRoutes);
